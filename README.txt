@@ -15,6 +15,32 @@
    use or modify them as you see fit--if
    you make improvements, please let me
    know!
+   
+   
+* USAGE:
+
+   The macros themselves are in "JP".
+   
+   Put "JP_Macro_Utils.bsh" in your "startup"
+   folder (in the jEdit settings directory).
+   
+   The CamelComplete, PIM, Movement, and Specific
+   subdirectories are for use with my own plugins
+   or specialized files, and probably aren't too
+   interesting to the general populace.
 
    Documentation is found in the "doc"
-   subdirectory.
+   directory. JARs that some macros depend
+   on are in the "jars" directory.
+
+
+* The most frequently useful macros, in my opinion, are
+   
+     Align on Character (and its two helpers)
+     Box Selection
+     Enumerate Lines
+     Evaluate Preceding Expression
+     Fill Paragraph
+     Insert Line Below
+     Repeat Character
+

@@ -100,6 +100,26 @@
   ASCII-only style compatible with the ditaa diagram tool
   (ditaa.sourceforge.net).
 
+  Examples:
+
+     ┌────────────┐
+     │  BOXES!    │
+     │            │
+     └────────────┘               ╭────╮
+                                  │BUB-│
+                                  │ BLE│
+                                  ╰────╯
+
+    ╔═══════════════════╦══════════════════════╗
+    ║    FACT #         ║   HOW FASCINATING?   ║
+    ╠═══════════════════╬══════════════════════╣ 
+    ║    232            ║      Not too much    ║
+    ║    993            ║      A Little        ║
+    ║      5            ║      Moderate        ║
+    ║     32            ║      Incredibly      ║
+    ╚═══════════════════╩══════════════════════╝
+                     Tables!
+
 
 == Reflow_Selection.bsh ==
 
