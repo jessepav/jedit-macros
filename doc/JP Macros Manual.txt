@@ -248,6 +248,11 @@
   of each, not separated by any blank lines (see the 's', 't', & 'n'
   options for Reflow_Selection above).
 
+== Unfill_Selection.bsh ==
+
+  Uses Reflow_Selection to remove hard line breaks from paragraphs
+  in the current selection (or the paragraph containing the caret,
+  if there's no selection).
 
 == Enumerate_Lines.bsh ==
 
@@ -346,5 +351,44 @@
   maxLineLen. To get the default behavior (i.e. using the length of
   the first line), unset the property or set JP.wrapmargin=0.
 
-  ----------------------------------------------------------------------
-  :noTabs=true:
+
+== Insert_Line_Below.bsh ==
+
+  Very simple, but surprisingly useful. It inserts a blank line
+  below the caret line, without moving the caret, like Emacs's
+  C-o (open-line) command.
+
+
+== Repeat_Character.bsh ==
+
+  Inserts a character any number of times, like using the Action Bar,
+  but quicker and without prompting for high repetitions.
+  
+  To use, create a "command string" in one of the below formats
+
+    <char> x <count>     ex. "* x 15"
+    <count><char>        ex. "60-"
+    
+  place the caret after the string and invoke this macro.
+  
+== Retain_Or_Remove_Lines.bsh ==
+
+  This is a small modification of Jia Zhiming's (jiazhimi@yahoo.com.cn)
+  macro of the same name. It uses Java's built-in regexp's and doesn't
+  strip whitespace from retained lines.
+
+== Sum-Count-Avg_Numbers.bsh ==
+
+  Select a list of (float) numbers separated by commas, and this macro
+  will insert a line into the buffer with the sum, count, and average
+  of the numbers.
+
+== Switch_Edit_Buffer.bsh ==
+
+  Prompts for a number n, and then will switch the view to show the
+  n-th open buffer. This is useful in combination with one of the
+  plugins (I use Buffer Selector) that shows you your open buffers
+  in order.
+
+----------------------------------------------------------------------
+:noTabs=true:

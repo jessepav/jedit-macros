@@ -1,12 +1,3 @@
-/*
-This macro accepts two forms of command-string:
-
-	<char> x <count>     ex. "* x 15"
-	<count><char>	     ex. "60-"
-
-*/
-
-
 int caretPos = textArea.getCaretPosition();
 int caretLine = textArea.getCaretLine();
 int caretCol = caretPos - textArea.getLineStartOffset(caretLine);
