@@ -283,7 +283,68 @@
     8. Beefsteak                  15. Beefsteak
 
 
+== Evaluate_Preceding_Expression.bsh ==
+
+  Similar to jEdit's built-in "Evaluate Selection", save
+  for two minor differences that make it quicker to invoke for simple
+  expressions (like numerical calculations with money).
+  
+    1. Instead of creating a selection and then evaluating it, this
+       macro scans backward from the caret until it encounters a
+       space, beginning of line, or a '$'. It treats the text
+       between the caret and that point as the BeanShell expression
+       to evaluate.
+
+    2. If the scan in the previous step stopped at a space or line
+       start, then the text is replaced by the result of the
+       evaluation as normal; but if it found a '$', then the
+       expression is assumed to be a calculation involving money,
+       and the result is treated as a Float and rounded to two
+       decimal places. This avoids irksome floating point
+       imprecisions in such calculations.
+       
+       ex.  Built-in Evaluation Selection (selecting "2.20+3.10"):
+                       $2.20+3.10 ==> $5.300000000000001
+                        
+            This macro:
+                       $2.20+3.10 ==> $5.30
+                                 ^
+                              caret here
 
 
-----------------------------------------------------------------------
-:noTabs=true:
+== Fill_Paragraph.bsh ==
+
+  (Note: Apache Commons Lang v3.4 or higher must be installed.)
+
+  This is a fill paragraph macro that can fill certain types of
+  paragraphs where the the average fill-paragraph command creates
+  a jumble. Paragraphs like
+  
+      Tab-indented with subsequent lines
+  not indented.
+  
+  - Lists where a bullet marks the first line
+    but subsequent lines are indented.
+       * And then sublists with different indentation
+         levels with no blank lines in-between.
+    
+  To make the implementation of this macro easy, youhave to invoke it
+  with the cursor *on the second or later* line of the paragraph.
+  
+  The macro looks at the indentation level of the current line, and
+  uses that as the paragraph indentation; then it scans up until it
+  finds a line with a different indentation, and this it considers the
+  first line. The column at which the first line ends is used as the
+  column to break later lines of the paragraph (unless "JP.wrapmargin"
+  is set--see below). Then, scanning downward, the end of the
+  paragraph is the last line that has the same indentation level as
+  the rest of the paragraph.
+  
+  To alter the line-length behavior, set the jEdit property
+  "JP.wrapmargin" to an integer column at which to wrap text. Setting
+  it to a negative value will have the macro use the buffer's
+  maxLineLen. To get the default behavior (i.e. using the length of
+  the first line), unset the property or set JP.wrapmargin=0.
+
+  ----------------------------------------------------------------------
+  :noTabs=true:
