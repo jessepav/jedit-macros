@@ -1,0 +1,23 @@
+String s = textArea.getSelectedText();
+if (s == null)
+    return;
+String[] nums = s.split("(\\s|,)+");
+
+int count;
+float avg = 0.0f, sum = 0.0f;
+
+for (String num : nums) {
+    try {
+    	float f = Float.parseFloat(num);
+    	count++;
+    	sum += f;
+    } catch (NumberFormatException ex) {
+    	continue;
+    }
+}
+
+avg = sum / count;
+
+textArea.setSelectedText(s + String.format(
+    "\n(count: %d, avg: %f, sum: %f)\n", new Object [] 
+    {count, avg, sum}));

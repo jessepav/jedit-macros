@@ -1,0 +1,12 @@
+import java.util.ArrayList;
+import com.illengineer.jcc.jedit.CamelCompletePlugin;
+
+CamelCompletePlugin.processConfiguration("View Buffers");
+ArrayList l = new ArrayList(4);
+if (CamelCompletePlugin.isEngineEnabled("XML")) {
+    CamelCompletePlugin.processConfiguration("XML");
+    l.add("XML");
+}
+l.add("View Buffers");
+l.add("Buffers");
+CamelCompletePlugin.complete(view, textArea, 2, l);

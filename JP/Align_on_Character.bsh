@@ -1,0 +1,220 @@
+/*******************************************************************************
+* Align on Character
+*
+* based on the original Beautify Text Table by Corin Langosch (info@netskin.com)
+* 
+* Modified by jpavel@alum.mit.edu to use an arbitrary regexp to perform alignment,
+* to join the columns with a configurable delimiter, to allow for different
+* horizontal column alignments, and padding with other characters than spaces.
+* 
+* ===== USAGE =====
+* 
+* Put a command string in the '|' (vertical bar) register in this format:
+* 
+*   /split regexp/delimiter/flags/column-spec/padding-char
+*                         [    these items are optional   ]
+* 
+* The '/' in the above line can actually be any non-alphabetic character that will
+* be used to mark the boundaries between the various parts of the command string.
+* Choose something that's not in your split regexp or delimiter!
+* 
+* The 'flags' can include
+* 
+*   B	Adds a delimter at the start of each line
+*   E	Adds padding and a delimiter at the end of each line
+*   T	Trims whitespace from the whole line before writing it to the buffer.
+*	Useful if your delimiter has whitespace, but you only want it between columns.
+*
+* The column-spec allows you to left-, right-, or center-align the various columns
+* of your input. Use a string of "L", "R", or "C", one for each column. If your input
+* has fewer columns than the spec, the extras are ignored; and if your input has
+* more columns, the default left-alignment is used.
+* 
+* padding-char, if included, will be used instead of a space character to pad your columns. 
+*
+* Example:
+* 
+*   /,\s+/ | /EBT/LLRC/*
+*
+*     Parsed: <split char> = '/', split regexp = ",\\s+", delimiter = " | ", flags = "EBT",
+*	      col-spec = "LLRC", padding-char="*"
+* 
+* The defaults, used if the command-string register is empty,
+* are "\t", " ", no flags, left-alignment, and spaces, respectively.
+* 
+* Jesse Pavel (jpavel@alum.mit.edu) - 2015/04/12
+*
+*******************************************************************************/
+
+import org.apache.commons.lang3.StringUtils;
+
+String splitRegexp = "\t";
+String delimiter = " ";
+
+boolean delimiterAtStart = false;
+boolean delimiterAtEnd = false;
+boolean trimSpace = false;
+String colspec = "";
+char paddingChar = ' ';
+
+// parseCommandString() {{{
+void parseCommandString() {
+  String s = getRegisterText('|');
+  if (s == null)
+    return;
+  
+  String splitCharRE = "\\" + s.charAt(0);
+  String [] parameters = s.substring(1).split(splitCharRE);
+  if (parameters.length < 2)
+    return;
+  splitRegexp = parameters[0];
+  delimiter = parameters[1];
+  if (parameters.length >= 3) {
+    if (parameters[2].indexOf('B') != -1)
+      delimiterAtStart = true;
+    if (parameters[2].indexOf('E') != -1)
+      delimiterAtEnd = true;
+    if (parameters[2].indexOf('T') != -1)
+      trimSpace = true;
+  }
+  if (parameters.length >= 4) {
+    colspec = parameters[3];
+  }
+  if (parameters.length >= 5) {
+    paddingChar = parameters[4].charAt(0);
+  }
+} 
+// }}}
+
+// getColspec() {{{
+// Note that 'col' is 0-indexed
+String getColspec(int col) { 
+  if (col > colspec.length() - 1)
+    return "L";
+  String s = colspec.substring(col, col + 1);
+  if(!"LRC".contains(s))
+    return "L";
+  else
+    return s;
+}
+// }}}
+
+// prePaddingAmount() and postPaddingAmount() {{{
+int prePaddingAmount(int col, int padding) {
+  String align = getColspec(col);
+  switch (align) {
+  case "L":
+    return 0;
+  case "R":
+    return padding;
+  case "C":
+    return padding / 2;
+  }
+}
+
+int postPaddingAmount(int col, int padding) {
+  String align = getColspec(col);
+  switch (align) {
+  case "L":
+    return padding;
+  case "R":
+    return 0;
+  case "C":
+    return padding/2 + padding%2;
+  }
+}
+
+// }}}
+
+// --------------------------------------
+// ------------- Main -------------------
+// --------------------------------------
+// {{{
+String text = textArea.getSelectedText();
+if (text != null) {
+  parseCommandString();
+  String[] lines = text.split("\\r?\\n");
+  ArrayList rows = new ArrayList();
+  ArrayList column_widths = new ArrayList();
+  for (int i = 0; i < lines.length; i++) {
+    String line = lines[i];
+    String[] cols = line.split(splitRegexp);
+    // I don't want to allow lines that don't have any split characters to mess up the sizing.
+    if (cols.length > 1) {
+      for (int j = 0; j < cols.length; j++) {
+	cols[j] = cols[j].trim();
+	Integer width = cols[j].length();
+	if (column_widths.size() <= j) {
+	  column_widths.add(width);
+	} else {
+	  if (column_widths.get(j) < width) {
+	    column_widths.set(j, width);
+	  }
+	}
+      }
+    }
+    rows.add(cols);
+  }
+  
+  StringBuilder t = new StringBuilder(); // whole replacement buffer
+  StringBuilder b = new StringBuilder();  // line buffer
+  int num_cols = column_widths.size();
+  for (int i = 0; i < rows.size(); i++) {
+    b.delete(0, b.length());  // start fresh each time
+    String[] cols = rows.get(i);
+    if (cols.length == 1) {  // just write degenerate columns to the output
+      t.append(cols[0]).append('\n');
+      continue;
+    }
+    if (delimiterAtStart)
+      b.append(delimiter);
+    int n = Math.min(num_cols, cols.length);
+    for (int j = 0; j < n; j++) {
+      String col = cols[j];
+      int width = column_widths.get(j);
+      int padding = width - col.length();
+      for (int k = 0; k < prePaddingAmount(j, padding); k++)
+	b.append(paddingChar);
+      b.append(col);
+      if (delimiterAtEnd || j < n - 1) {
+	for (int k = 0; k < postPaddingAmount(j, padding); k++)
+	  b.append(paddingChar);
+	b.append(delimiter);
+      }
+    }
+    t.append(trimSpace ? b.toString().trim() : b);
+    t.append('\n');
+  }
+  textArea.setSelectedText(t.toString());
+} else {
+  Macros.message(view,
+	"Put a command string in the '|' (vertical bar) register in this format:                  \n" +
+	"                                                                                         \n" +
+	"  /split regexp/delimiter/flags/column-spec/padding-char                                 \n" +
+	"                                                                                         \n" +
+	"                    (flags, column-spec, and padding-char are optional)                  \n" +
+	"                                                                                         \n" +
+	"The '/' in the above line can actually be any non-alphabetic character that will         \n" +
+	"be used to mark the boundaries between the various parts of the command string.          \n" +
+	"Choose something that's not in your split regexp or delimiter!                           \n" +
+	"                                                                                         \n" +
+	"The 'flags' can include                                                                  \n" +
+	"                                                                                         \n" +
+	"  B   Adds a delimter at the start of each line                                          \n" +
+	"  E   Adds padding and a delimiter at the end of each line                               \n" +
+	"  T   Trims whitespace from the whole line before writing it to the buffer.              \n" +
+	"      Useful if your delimiter has whitespace, but you only want it between columns.     \n" +
+	"                                                                                         \n" +
+	"The column-spec allows you to left-, right-, or center-align the various columns         \n" +
+	"of your input. Use a string of \"L\", \"R\", or \"C\", one for each column. If your input\n" +
+	"has fewer columns than the spec, the extras are ignored; and if your input has           \n" +
+	"more columns, the default left-alignment is used.                                        \n" +
+	"                                                                                         \n" +
+	"padding-char, if included, will be used instead of a space character to pad your         \n" +
+	"columns.                                                                                 \n" +
+	"\n==    Then select some text and invoke this macro again.    ==");
+}
+  
+// }}}
+
+// :indentSize=2:autoIndent=simple:folding=explicit:

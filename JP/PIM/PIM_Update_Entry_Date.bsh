@@ -1,0 +1,56 @@
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.util.regex.*;
+
+import org.apache.commons.lang3.StringUtils;
+
+int l = textArea.getCaretLine();
+int col = textArea.getCaretPosition() - textArea.getLineStartOffset(l);
+String s = textArea.getLineText(l);
+Matcher m = pimDateLinePattern.matcher(s);
+if (!m.lookingAt())
+    return;
+String entryDateString = StringUtils.defaultString(m.group(1));
+String originalEntryRep = StringUtils.defaultString(m.group(2));
+String entryRepString = originalEntryRep.toLowerCase();
+LocalDate entryDate = null;
+try {
+    entryDate = pimDateFormatter.parseLocalDate(entryDateString);
+} catch (IllegalArgumentException ex) {
+    return;
+}
+if (entryRepString.equals("daily"))
+    entryRepString = "1 days";
+else if (entryRepString.equals("weekly"))
+    entryRepString = "1 weeks";
+else if (entryRepString.equals("monthly"))
+    entryRepString = "1 months";
+else if (entryRepString.equals("yearly"))
+    entryRepString = "1 years";
+
+// (\d+) +(days|weeks|months|years)
+Pattern repPattern = Pattern.compile("(\\d+) +(days|weeks|months|years)");
+m = repPattern.matcher(entryRepString);
+if (!m.matches())
+    return;
+int count = Integer.parseInt(m.group(1));
+String unit = m.group(2);
+
+LocalDate newEntryDate = null;
+if (unit.equals("days"))
+    newEntryDate = entryDate.plusDays(count);
+else if (unit.equals("weeks"))
+    newEntryDate = entryDate.plusWeeks(count);
+else if (unit.equals("months"))
+    newEntryDate = entryDate.plusMonths(count);
+else if (unit.equals("years"))
+    newEntryDate = entryDate.plusYears(count);
+
+StringBuilder sb = new StringBuilder();
+sb.append(s.charAt(0)).append(' ').append(pimDateFormatter.print(newEntryDate)).append(" [");
+sb.append(originalEntryRep).append("]:").append(s.substring(s.indexOf(':') + 1)).append('\n');
+textArea.setSelection(new Selection.Range(textArea.getLineStartOffset(l), textArea.getLineEndOffset(l)));
+textArea.setSelectedText(sb.toString());
+textArea.setCaretPosition(textArea.getLineStartOffset(l) + Math.min(col, textArea.getLineLength(l)));

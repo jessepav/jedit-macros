@@ -1,0 +1,73 @@
+// Put this script in the "startup" directory of your jEdit settings directory.
+// To reload while editing:
+// 	BeanShell.runScript(view,buffer.getPath(),null,false);
+
+import java.awt.datatransfer.DataFlavor;
+
+String getRegisterText(char reg) // {{{
+{
+    Registers.Register r = Registers.getRegister(reg);
+    if (r == null) {
+	return null;
+    } else {
+	return r.getTransferable().getTransferData(DataFlavor.stringFlavor).toString();
+    }
+} // }}}
+
+Object saveRegisterText(String regNames) // {{{
+{
+    String [] savedRegValues = new String[regNames.length()];
+    
+    for (int i = 0; i < regNames.length(); i++)
+	savedRegValues[i] = getRegisterText(regNames.charAt(i));
+
+    Object [] saved = new Object[2];
+    saved[0] = regNames;
+    saved[1] = savedRegValues;
+    return saved;
+} // }}}
+
+void restoreRegisterText(Object savedObj) // {{{
+{
+    Object [] saved = (Object[])savedObj;
+    String regNames = (String)saved[0];
+    String [] savedRegValues = (String [])saved[1];
+    for (int i = 0; i < savedRegValues.length; i++) {
+	if (savedRegValues[i] != null)
+	    Registers.setRegister(regNames.charAt(i), savedRegValues[i]);
+	else
+	    Registers.clearRegister(regNames.charAt(i));
+    }
+} // }}} 
+
+//{{{  boundedInt()
+public int boundedInt(int min, int max, int i) {
+    if (min > max)
+	return min;
+    return Math.min(Math.max(i, min), max);
+}
+// }}}
+
+// {{{ parseBoolean() & parseInt()
+public boolean parseBoolean(String s) {
+    if (s != null && (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("on") || s.equals("1") || s.equals("yes")))
+	return true;
+    else
+	return false;
+}
+
+public static int parseInt(String s, int errorVal) {
+    int i = 0;
+    if (s != null && s.length() > 0) {
+	try { i = Integer.parseInt(s); }
+	catch (NumberFormatException ex) { i = errorVal; }
+    }
+    return i;
+}
+
+public static int parseInt(String s) {
+    return parseInt(s, 0);
+}
+// }}}
+
+// :folding=explicit:

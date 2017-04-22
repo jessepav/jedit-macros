@@ -1,0 +1,7 @@
+SearchAndReplace.setSearchString(pimCurrentDateString);
+SearchAndReplace.setAutoWrapAround(true);
+SearchAndReplace.setWholeWord(false);
+SearchAndReplace.setRegexp(false);
+SearchAndReplace.setSearchFileSet(new CurrentBufferSet());
+SearchAndReplace.find(view);
+textArea.goToStartOfLine(false);

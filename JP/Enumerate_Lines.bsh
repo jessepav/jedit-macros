@@ -1,0 +1,38 @@
+import java.util.regex.*;
+import java.land.Math;
+
+// "(\s*)(\d+)\. "
+Pattern numberedLinePattern = Pattern.compile("(\\s*)(\\d+)\\. ");
+
+String text = textArea.getSelectedText();
+if (text == null)
+    return;
+String [] lines = text.split("\\r?\\n");
+StringBuilder t = new StringBuilder();
+
+/* If the first line of the selected text already is enumerated, we'll
+   just go through the selection updating the numbers (for instance, if
+   the user has added or deleted lines, or has items that span more than
+   one line) */
+Matcher m = numberedLinePattern.matcher(lines[0]);
+if (m.lookingAt()) {
+    int counter = parseInt(m.group(2), 1);
+    for (int i = 0; i < lines.length; i++) {
+	m = numberedLinePattern.matcher(lines[i]);
+	if (m.lookingAt()) {
+	    t.append(m.group(1)); // the whitespace
+	    t.append(Integer.toString(counter++)).append(". "); // a new counter
+	    t.append(lines[i].substring(m.end()));
+	} else {
+	    t.append(lines[i]);  // pass un-numbered lines through unchaged.
+	}
+	t.append('\n');
+    }
+} else {
+    int width = (int)Math.log10((double)lines.length) + 1;
+    for (int i = 0; i < lines.length; i++) {
+	t.append(String.format("%" + width + "d. ", new Object[] {Integer.valueOf(i+1)}));
+	t.append(lines[i]).append('\n');
+    }
+}
+textArea.setSelectedText(t.toString());

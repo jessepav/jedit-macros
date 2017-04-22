@@ -1,0 +1,24 @@
+/*
+    This macro forces the AddAbbrevDialog to be displayed for the word at
+    the cursor, even if an abbreviation is already defined for that word.
+*/
+
+void setNewModeAbbrev() {
+    int line = textArea.getCaretLine();
+    String lineText = buffer.getLineText(line);
+    int pos = textArea.getCaretPosition() - buffer.getLineStartOffset(line);
+    
+    int wordStart = TextUtilities.findWordStart(lineText,pos - 1, buffer.getStringProperty("noWordSep"));
+    String abbrev = lineText.substring(wordStart,pos);
+    
+    /*
+    String mode = buffer.getMode().getName();
+    java.util.Hashtable abbrevMap = Abbrevs.getModeAbbrevs().get(mode);
+    if (abbrevMap.containsKey(abbrev))
+	abbrevMap.remove(abbrev);
+    */
+    
+    new AddAbbrevDialog(view, abbrev);
+}
+
+setNewModeAbbrev();

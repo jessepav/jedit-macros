@@ -1,0 +1,10 @@
+if (textArea.getSelectionCount() == 0)
+    return;
+
+Object savedRegisters = saveRegisterText("|");
+    
+Registers.setRegister('|', "/,\\s*/   /T/");
+File scriptFile = new File (new File(scriptPath).getParentFile(), "Align_on_Character.bsh");
+Macros.runScript(view, scriptFile.getPath(), false);
+ 
+restoreRegisterText(savedRegisters);

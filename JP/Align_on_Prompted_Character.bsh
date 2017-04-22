@@ -1,0 +1,20 @@
+import org.apache.commons.lang3.StringEscapeUtils;
+
+if (textArea.getSelectionCount() == 0)
+    return;
+
+
+// This is the code that is escaped below. Note that the scriptPath of *this*
+// macro is embedded in the BeanShell code to execute upon keypress.
+//
+// Object savedRegisters = saveRegisterText("|");
+// Registers.setRegister('|', "/(?=\\" + __char__ + "\\s*)/ /T/");
+// File scriptFile = new File (new File(_scriptPath).getParentFile(), "Align_on_Character.bsh");
+// Macros.runScript(view, scriptFile.getPath(), false);
+// restoreRegisterText(savedRegisters);                                                           
+  
+
+view.getInputHandler().readNextChar("Align on which (punctuation) character?",
+    "String _scriptPath = \"" + StringEscapeUtils.escapeJava(scriptPath) + "\";" +
+    "Object savedRegisters = saveRegisterText(\"|\");\nRegisters.setRegister('|', \"/(?=\\\\\" + __char__ + \"\\\\s*)/ /T/\");\nFile scriptFile = new File (new File(_scriptPath).getParentFile(), \"Align_on_Character.bsh\");\nMacros.runScript(view, scriptFile.getPath(), false);\nrestoreRegisterText(savedRegisters);"
+    );

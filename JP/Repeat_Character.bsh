@@ -1,0 +1,51 @@
+/*
+This macro accepts two forms of command-string:
+
+	<char> x <count>     ex. "* x 15"
+	<count><char>	     ex. "60-"
+
+*/
+
+
+int caretPos = textArea.getCaretPosition();
+int caretLine = textArea.getCaretLine();
+int caretCol = caretPos - textArea.getLineStartOffset(caretLine);
+
+String line = textArea.getLineText(caretLine);
+
+int count;
+char c;
+
+boolean found = false;
+int i;
+// Let's try the first form of command-string.
+//
+// Read backward to read the repetition count.
+for (i = caretCol - 1; i >= 0 && Character.isDigit(line.charAt(i)); i--);
+// If there's no digit at the caret, or this isn't a well-formed line, try the second
+// form of command string..
+if (i == caretCol - 1 || i < 3 || !line.substring(i-2, i+1).matches(" [x\\*] ")) {
+    if (caretCol >= 2 && Character.isDigit(line.charAt(caretCol-2))) {
+	// this will work.
+	c = line.charAt(caretCol-1);
+	for  (i = caretCol - 2; i >= 0 && Character.isDigit(line.charAt(i)); i--);
+	count = Integer.parseInt(line.substring(i+1, caretCol-1));
+	for (int j = 0; j < (caretCol - i - 1); j++)
+	    textArea.backspace();
+	found = true;
+    }
+} else {
+    found = true;
+    count = Integer.parseInt(line.substring(i+1, caretCol));
+    c = line.charAt(i-3);
+    for (int j = 0; j < (caretCol - i + 3); j++)
+	textArea.backspace();
+}
+
+if (!found)
+    return;
+
+StringBuilder sb = new StringBuilder();
+for (int j = 0; j < count; j++)
+    sb.append(c);
+textArea.setSelectedText(sb.toString());

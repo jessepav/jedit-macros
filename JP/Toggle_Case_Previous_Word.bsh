@@ -1,0 +1,13 @@
+// This macro does just what you might think - toggles the case
+// of the word preceding the caret.
+
+textArea.goToPrevWord(true);
+String word = textArea.getSelectedText();
+if (word != null) {
+    if (word.length() > 0 && Character.isUpperCase(word.charAt(0)))
+	textArea.toLowerCase();
+    else
+	textArea.toUpperCase();
+}
+
+

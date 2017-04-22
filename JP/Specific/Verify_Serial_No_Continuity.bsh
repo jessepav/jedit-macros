@@ -1,0 +1,88 @@
+import java.util.regex.*;
+
+Pattern p1 = Pattern.compile("Thymatron System 4.*SN:(.+)$");
+Pattern p2 = Pattern.compile("\\s*(4\\d{4})\\b");
+
+int[] getSerialsInText(String s) {
+    Matcher m = p1.matcher(s);
+    int[] ia = null;
+    String [] serials = null;
+    if (m.find()) {
+    	serials = m.group(1).trim().split("[ ,]+");
+    } else {
+	m = p2.matcher(s);
+	if (m.lookingAt())
+	    serials = new String [] {m.group(1)};
+    }
+    if (serials != null) {
+    	ia = new int[serials.length];
+    	for (i = 0; i < serials.length; i++) {
+    	    try {
+		ia[i] = Integer.parseInt(serials[i]);
+	    } catch (NumberFormatException ex) {
+	    	ia[i] = -1;
+	    }
+	}
+    }
+    return ia;
+}
+
+int lowest = Integer.MAX_VALUE, highest = 0;  // the serial numbers found in the invoice file
+ArrayList serial_list = new ArrayList(400);  // we probably won't have more than 400 serial #'s
+StringBuilder sb = new StringBuilder();  // The message we'll present to the user after we're done
+// Buffer[] buffers = editPane.getBufferSet().getAllBuffers();
+Buffer[] buffers = new Buffer[] { buffer };
+
+sb.append("In ");
+for (Buffer buf : buffers) {
+    String bufname = buf.getName();
+    if (bufname.indexOf("Invoice") == -1 && bufname.indexOf("Packing Slips") == -1)
+    	continue;
+    sb.append(sb.length() > 3 ? ", " : "").append(bufname);
+    // First we go through the file to determine the lowest and highest serial #,
+    // and to gather up all the serial #'s we find.
+    int numLines = buf.getLineCount();
+    for (int n = 0; n < numLines; n++) {
+	int[] serials = getSerialsInText(buf.getLineText(n));
+	if (serials != null) {
+	    for (int serial : serials) {
+		if (serial == -1)  // A malformed serial #
+		    continue;
+		if (!serial_list.contains(Integer.valueOf(serial)))
+		    serial_list.add(Integer.valueOf(serial));
+		if (serial < lowest)
+		    lowest = serial;
+		if (serial > highest)
+		    highest = serial;
+	    }
+	}
+    }
+}
+sb.append("\n\n");
+
+if (serial_list.isEmpty()) {
+    Macros.message(view, "There were no serial #'s in this file.");
+    return;
+}
+
+sb.append("the serial # range was from\n\n   ").append(lowest).append(" to ").append(highest).append("\n\n");
+
+if (serial_list.size() == (highest - lowest + 1)) {
+    sb.append("No serial #'s were missing.\n");
+} else {
+    // a 'false' in serials_present indicates that the serial # was not found
+    boolean[] serials_present = new boolean[highest - lowest + 1];
+    
+    sb.append("The missing serial #'s are\n\n");
+    
+    // Now let's fill out the boolean bitmap
+    for (Integer i : serial_list)
+	serials_present[i.intValue() - lowest] = true;
+    for (int i = 0; i < serials_present.length; i++) {
+    	if (!serials_present[i])
+	    sb.append("   ").append(i + lowest).append("\n");
+    }
+}
+sb.append("\n");
+
+Macros.message(view, sb.toString());

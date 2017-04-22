@@ -1,0 +1,10 @@
+// Note that you'll need the .jar for Apache Commons Lang v3 in your jEdit jars directory before
+// using this macro.
+
+if (textArea.getSelectionCount() > 0) {
+    view.getInputHandler().readNextChar("Save to which register (a capital letter will unescape text)?",
+    	"import org.apache.commons.lang3.StringEscapeUtils; " +
+    	"String text = textArea.getSelectedText(); " +
+	"Registers.setRegister(__char__, Character.isUpperCase(__char__) ? " +
+	    "StringEscapeUtils.unescapeJava(text) : StringEscapeUtils.escapeJava(text));");
+}

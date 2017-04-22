@@ -1,0 +1,50 @@
+// Put this script in the "startup" directory of your jEdit settings directory.
+// To reload while editing:
+// 	BeanShell.runScript(view,buffer.getPath(),null,false);
+
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.regex.*;
+
+DateTimeFormatter pimDateFormatter = DateTimeFormat.forPattern("M/d/yy").withPivotYear(LocalDate.now().getYear());
+
+// \p{Punct} ?(\d{1,2}/\d{1,2}/\d{2,4})(?: ?\[([^\]]+)\])?:
+// $1 = date, $2 = repetition (if present)
+Pattern pimDateLinePattern = Pattern.compile("\\p{Punct} ?(\\d{1,2}/\\d{1,2}/\\d{2,4})(?: ?\\[([^\\]]+)\\])?:");
+
+String pimCurrentDateString = ">>>>>>>>>>>>>";
+
+// {{{ pimGetEntryLine()
+
+/* pimGetEntryLine() searches through the textArea starting from 'firstLine'
+   and moving downward until 'lastLine' (exclusive), looking for the proper
+   place to insert an entry with 'entryDate' date.
+*/
+int pimGetEntryLine(int firstLine, int lastLine, LocalDate entryDate, TextArea textArea) {
+    // March down the file looking for the proper place to insert it
+    for (int l = firstLine; l < lastLine; l++) {
+	String s = textArea.getLineText(l);
+	if (s.length() == 0)
+	    return l;  // a blank line indicates that we've reached the end of a PIM section, so we stick our entry here
+	Matcher m = pimDateLinePattern.matcher(s);
+	if (m.lookingAt()) {
+	    String dateString = StringUtils.defaultString(m.group(1));
+	    String repString = StringUtils.defaultString(m.group(2));
+	    LocalDate ld = null;
+	    try {
+		ld = pimDateFormatter.parseLocalDate(dateString);
+	    } catch (IllegalArgumentException ex) {
+		continue;
+	    }
+	    if (entryDate.compareTo(ld) <= 0) // this is the insert point!
+		return l;
+	}
+    }
+}
+// }}}
+
+// :folding=explicit:

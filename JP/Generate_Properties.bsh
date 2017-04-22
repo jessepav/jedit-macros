@@ -1,0 +1,172 @@
+// A mad-phizzat property method macro.
+
+
+/* 
+Usage:
+
+Create a specially-formatted line (it can be within a comment):
+
+(type, varname [varname ...], Block delimeter)
+
+Later on in the same file, you should have a fold region named as your block delimeter.
+For instance
+
+    (int, x y counter, Property Accessors)
+    
+    ...
+    
+    // {{{ Property Accessors
+    ...
+    // }}}
+
+Note the space after the '{{{' and before the name.
+If you have a '!' at the start of your block delimeter, the contents of the fold will
+be replaced.
+
+    (int, x y counter, !Property Accessors)
+
+You can have multiple definition lines in your selection, in which case they'll be processed
+from top to bottom. Note that you should have only one '!' line per block name, otherwise
+previous accessor methods will get overwritten. If you omit the block delimeter, as
+below, the previous value will be used.
+
+    (int, x y counter, !Property Accessors)
+    (float, calc mean sum, Property Accessors)
+    (float, f1 f2)  // same effect as the above delimeter
+    (String, name value, !String Accessors)
+
+    // {{{ Property Accessors
+    // }}}
+    
+    // {{{ String Accessors
+    // }}}
+
+If your varname ends with a '\', it will be considered read-only, and no setter generated.
+If the varname (before the '\', if it has one) ends with a '[]', it is considered an array
+accessor name, and indexed methods will be generated.
+
+    (String, array1[], !Property methods)
+    
+    // {{{ Property methods
+    public String getArray1(int index) {
+	return array1[index];
+    }
+    
+    public void setArray1(int index, String array1) {
+	this.array1[index] = array1;
+    }
+    // }}}
+
+
+*/
+
+import java.util.regex.*;
+
+String lastblock = "";
+
+void updatePropertyLine(int l0) {
+    String line = textArea.getLineText(l0);
+    Matcher m = Pattern.compile("\\((.*)\\)").matcher(line);
+    if (!m.find()) return;
+    
+    line = m.group(1);
+    String [] parts = line.split("\\s*,\\s*");
+    if (parts.length < 2) return;
+    
+    String type = parts[0].trim();
+    String [] vars = parts[1].trim().split("\\s+");
+    String block;
+    if (parts.length == 3)
+	block = parts[2].trim();
+    else
+	block = lastblock;
+	
+    boolean replace = false;
+    if (block.charAt(0) == '!') {
+	replace = true;
+	block = block.substring(1);
+    }
+    lastblock = block;
+    
+    int l1 = -1, l2 = -1;
+    int lm = textArea.getLineCount();
+    String open = "{{{ " + block, close = "}}}";
+    for (int i = l0; i < lm; i++) {
+	if (l1 == -1 && textArea.getLineText(i).indexOf(open) != -1)
+	    l1 = i;
+	else if (l1 != -1 && textArea.getLineText(i).indexOf(close) != -1) {
+	    l2 = i;
+	    break;
+	}
+    }
+    if (l1 == -1 || l2 == -1) return;
+    
+    // Delete the old text
+    if (replace)
+	textArea.setSelectedText(new Selection.Range(textArea.getLineStartOffset(l1+1), textArea.getLineStartOffset(l2)), "");
+    
+    int indent = 0;
+    line = textArea.getLineText(l1);
+    while (Character.isWhitespace(line.charAt(indent)))
+	indent++;
+    
+    char [] ca = new char[indent];
+    for (int i = 0; i < indent; i++)
+	ca[i] = line.charAt(i);
+    String ws = new String(ca);
+    
+    // Okay, now the meat.
+    textArea.setCaretPosition(textArea.getLineStartOffset(replace ? l1 + 1 : l2));
+    if (!replace)
+	textArea.setSelectedText("\n");
+
+    boolean readonly;
+    String indexString, varIndexString;
+    String name;
+    int len;
+    for (int i = 0; i < vars.length; i++) {
+	len = vars[i].length();
+	if (vars[i].charAt(len-1) == '\\') {
+	    readonly = true;
+	    vars[i] = vars[i].substring(0, len-1);
+	    len--;
+	} else
+	    readonly = false;
+	if (len > 2 && vars[i].indexOf("[]") == len - 2) {
+	    indexString = "int index";
+	    varIndexString = "[index]";
+	    vars[i] = vars[i].substring(0, len-2);
+	    len -= 2;
+	} else
+	    indexString = varIndexString = "";
+	
+	if (vars[i].length() > 1 && Character.isUpperCase(vars[i].charAt(1)))
+	    name = vars[i];
+	else
+	    name = Character.toUpperCase(vars[i].charAt(0)) + vars[i].substring(1);
+	if (i != 0)
+	    textArea.setSelectedText("\n");
+	textArea.setSelectedText(ws + "public " + type + " get" + name + "("+indexString+") {\n");
+	textArea.setSelectedText(ws + "    return " + vars[i] + varIndexString + ";\n" + ws + "}\n");
+	if (!readonly) {
+	    if (indexString.length() != 0)
+		indexString += ", ";
+	    textArea.setSelectedText("\n");
+	    textArea.setSelectedText(ws + "public void set" + name + "(" + indexString + type + " " + vars[i] + ") {\n");
+	    textArea.setSelectedText(ws + "    this." + vars[i] + varIndexString + " = " + vars[i] + ";\n" + ws + "}\n");
+	}
+    }
+}
+
+int p = textArea.getCaretPosition();
+
+if (textArea.getSelectionCount() > 0) {
+    Selection sel = textArea.getSelection(0);
+    for (int i = sel.getStartLine(); i <= sel.getEndLine(); i++)
+	updatePropertyLine(i);
+} else
+    updatePropertyLine(textArea.getCaretLine());
+
+textArea.setCaretPosition(p);
+
+// :mode=java2:

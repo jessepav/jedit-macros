@@ -1,0 +1,20 @@
+/*  
+    This macro behaves like the built-in Expand Abbrev command, except that it
+    forces the display of the Add Abbrev Dialog even if an expansion for the
+    abbreviation before the cursor already exists.
+*/
+
+void addAbbrev() {
+    int line = textArea.getCaretLine();
+    int lineStart = buffer.getLineStartOffset(line);
+    int caret = textArea.getCaretPosition();
+    String lineText = buffer.getLineText(line);
+    int pos = caret - lineStart;
+    if (lineText.length() == 0 || pos == 0) return;
+    
+    int wordStart = TextUtilities.findWordStart(lineText, pos - 1, buffer.getStringProperty("noWordSep"));
+    String abbrev = lineText.substring(wordStart, pos);
+    new AddAbbrevDialog(view, abbrev);
+}
+
+addAbbrev();

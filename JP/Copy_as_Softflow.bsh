@@ -1,0 +1,10 @@
+if (textArea.getSelectionCount() == 0)
+    return;
+
+Object savedRegisters = saveRegisterText("R");
+    
+Registers.setRegister('R', "reflow:s r$ q");
+File scriptFile = new File (new File(scriptPath).getParentFile(), "Reflow_Selection.bsh");
+Macros.runScript(view, scriptFile.getPath(), false);
+ 
+restoreRegisterText(savedRegisters);

@@ -1,0 +1,47 @@
+import java.util.regex.*;
+
+int charCount(String s, char c) {
+    int l = s.length();
+    int count = 0;
+    for (int i = 0; i < l; i++) {
+    	if (s.charAt(i) == c)
+    	    count++;
+    }
+    return count;
+}
+
+Pattern p = Pattern.compile("\\$([\\d,.]+)\\s*$");
+Pattern q = Pattern.compile("(\\d+) x ");
+Matcher m;
+
+java.text.NumberFormat format = new java.text.DecimalFormat("###,##0.00");
+
+float total = 0f;
+
+for (int i = textArea.getCaretLine() - 1; i >= 0; i--) {
+    String line = buffer.getLineText(i);
+    float amount = 0f;
+    int numDollars = charCount(line, '$');
+    if (numDollars > 0) {
+	m = p.matcher(line);
+	if (m.find()) {
+	    amount = Float.parseFloat(m.group(1).replace(",",""));
+	    if (numDollars == 1) {
+		m = q.matcher(line);
+		if (m.find()) {
+		    int qty = Integer.parseInt(m.group(1));
+		    if (qty > 1) {
+			amount *= qty;
+			buffer.insert(buffer.getLineStartOffset(i) + line.length(), 
+				      "$" + format.format(amount));
+		    }
+		}
+	    }
+	}
+	total += amount;
+    }
+    else if (line.matches("\\s*"))
+	break;
+}
+
+buffer.insert(textArea.getCaretPosition(), format.format(total));

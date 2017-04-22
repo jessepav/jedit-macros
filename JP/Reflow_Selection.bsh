@@ -1,0 +1,455 @@
+/*
+
+This script can reflow text in a variety of ways, and will save the reflowed
+text to a register (recall that the special register '$' represents the system
+clipboard); alternately, this macro treats the register name "~" specially, and
+will replace the selection with the reflowed text rather than saving it.
+
+It pops up an input dialog to let the user choose what type of reflow it should
+perform. Options are separated by spaces, and can be listed in any order. Options
+may also be passed to the script, preventing the popup, by loading a string into
+register 'R' of the format "reflow:<options>".
+
+Options:
+--------------------------------------------------------------------------------
+s	Soft reflow. This will join together lines that are not separated by a
+	blank line into one logical paragraph. Such paragraphs are then
+	separated from each other by a single newline. This method is good if
+	you're going to import the resulting text to another program that
+	performs its own line-wrapping, such as email, word-processors, etc.
+	If <cols> is given, then lines that are shorter than <cols> will NOT
+	be reformatted, and will be passed through into the output as-is.
+
+h<cols>	Hard reflow. This considers a group of lines that are not separated by
+	a blank line as a logical paragraph, and joins them together into one
+	block of text with <cols> columns. If <cols> isn't given, then the
+	default of 72 is used.
+
+t<s>	Tabs. If this option is present, each paragraph will be indented by a
+	tab character. For hard reflow, a tab is considered 8 characters. If
+	<s> is given, then instead of a tab character <s> spaces will be used
+	to lead paragraphs.
+
+b<n>	How many blank lines (<n>) separate logical paragraphs in the input text?
+	The default is 1. Note that if you set this to 0, then every non-blank
+	line is considered a paragraph.
+
+n<i>	Separates paragraphs in the output using <i> newlines. The default is
+	to use 2 newlines (a blank line).
+
+c	Condense blank lines between paragraphs into one separator. Without this
+	option, if, say, you pass b1 and n2, and two input paragraphs are
+	separated by three blank lines, two additional newlines will be passed
+	through to the output.
+
+S<pd=>	Suppress indentation on multiple blank lines. What this means is that
+	if the input contains more blank lines than necessary (b<n>) to separate
+	two paragraphs, the indentation for the second paragraph will be suppressed,
+	like the first paragraph of a section in books.
+	    Additionally, if the argument is given as "Sp", a paragraph consisting
+	entirely of punctuation (that is, \p{Punct} from the Pattern class) and
+	whitespace, and which is less than 72 characters long, will cause the
+	*next* paragraph to have its indentation suppressed. "Spd" will do the same,
+	but will include digits ("\d") in the regexp.
+	    If you append an "=" to the suppression option (ex. "Sp="), then the
+	paragraph that triggered suppression will have its own indentation
+	suppressed as well.
+
+f	Recognize special formatting marks in the input text. Currently these
+	include two special character sequences at the start of an input line
+	that control the indentation for that paragraph, overriding the defaults:
+	
+	    "|"	  Do not indent this paragraph.
+	    "|>"  Indent this paragraph using a tab.
+
+e	Enables escape sequence processing in each paragraph's text. This is
+	similar to escape sequences in Java string literals. Currently recognized
+	escapes are: \t, \n, \\
+
+#	Enable hash-mark processing; with this option, a line consisting of only
+	a hash mark will be treated as a blank line for paragraph delimitation,
+	but will additionally insert a newline into the output. It can be used
+	to make the layout of the source text more closely match the output.
+	Note that using this option with b<n> where n>1 will lead to odd results.
+
+r<c>	Put the output into register <c>. Note that '$' is the system clipboard,
+	the default.
+
+q	Quiet. Suppresses the completion message.
+
+--------------------------------------------------------------------------------
+
+To prevent a section of text from being reformatted, enclose it between a
+"\begin{pre}" and "\end{pre}" on lines by themselves. The \begin{pre} and
+\end{pre} will not be included in the output.
+
+*/
+
+// {{{ Imports
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.DataFlavor;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+// }}}
+
+// {{{ Preliminaries: ensure some text is selected and get option string from register
+if (textArea.getSelectionCount() == 0) {
+    Macros.error(view, "You need to select text before invoking this macro.");
+    return;
+}
+
+String s = null;
+Registers.Register r = Registers.getRegister('R');
+if (r != null) {
+    Transferable t = r.getTransferable();
+    s = t.getTransferData(DataFlavor.stringFlavor).toString();
+    s = s.startsWith("reflow:") ? s.substring(7) : null;
+}
+if (s == null) {
+    s = Macros.input(view, "Options (s h<cols> t<s> b<n> n<i> c S<pd=> f e # r<c> q)");
+    if (s == null) return;
+}
+// }}}
+
+// {{{ Global constants and variables
+
+// Note that because of the way we iterate through this array, if multiple
+// formattingPrefixes share the same leading substring, the longer one has
+// to appear later in the array.
+final String [] formattingPrefixes = new String [] {"|", "|>"};
+
+// Default options -------------
+final int REFLOW_SOFT = 0, REFLOW_HARD = 1;
+final int TAB_CHAR = -1, NO_TAB = 0;   // anything > 0 means spaces
+
+int reflow = REFLOW_SOFT;
+int tab_spaces = NO_TAB;
+int cols = 72;
+int blanks = 1;
+int newlines = 2;
+boolean condenseBlanks = false;
+boolean suppressIndentation = false, suppressCurrentIndentation = false;
+Pattern indentationSuppressionPattern = null;
+boolean heedFormatting = false, processEscapes = false;
+boolean hashProcessing = false, insertHashNewline = false;
+char register = '$';
+boolean quiet = false;
+// }}}
+
+// {{{ Parse the options
+String[] options = s.trim().split("\\s+");
+for (String o : options) {
+    if (o.equals("s")) {
+	reflow = REFLOW_SOFT;
+    } else if (o.charAt(0) == 'h') {
+	reflow = REFLOW_HARD;
+	if (o.length() > 1)
+	    cols = Integer.parseInt(o.substring(1));   // parse errors be damned!
+    } else if (o.charAt(0) == 't') {
+	tab_spaces = TAB_CHAR;
+	if (o.length() > 1)
+	    tab_spaces = Integer.parseInt(o.substring(1));
+    } else if (o.charAt(0) == 'b' && o.length() > 1) {
+	blanks = Integer.parseInt(o.substring(1));
+    } else if (o.charAt(0) == 'n' && o.length() > 1) {
+	newlines = Integer.parseInt(o.substring(1));
+    } else if (o.charAt(0) == 'r' && o.length() == 2) {
+	register = o.charAt(1);
+    } else if (o.charAt(0) == 'c') {
+	condenseBlanks = true;
+    } else if (o.charAt(0) == 'S') {
+	suppressIndentation = true;
+	if (o.startsWith("Spd")) {
+	    indentationSuppressionPattern =
+	       Pattern.compile("[\\d\\p{Punct}][\\d\\p{Punct}\\s]*", Pattern.UNICODE_CHARACTER_CLASS);
+	} else if (o.startsWith("Sp")) {
+	    indentationSuppressionPattern =
+	       Pattern.compile("\\p{Punct}[\\p{Punct}\\s]*", Pattern.UNICODE_CHARACTER_CLASS);
+	}
+        if (o.endsWith("="))
+	    suppressCurrentIndentation = true;
+    } else if (o.charAt(0) == 'f') {
+	heedFormatting = true;
+    } else if (o.charAt(0) == 'e') {
+	processEscapes = true;
+    } else if (o.charAt(0) == '#') {
+	hashProcessing = true;	// see usage in isLineWhitespace()
+    } else if (o.equals("q")) {
+	quiet = true;
+    }
+}
+// }}}
+
+// {{{ Get line range to process, set up StringBuilders and other variables for main loop
+Selection sel = textArea.getSelection(0);
+int startLine = sel.getStartLine(), endLine = sel.getEndLine();
+if (sel.getEnd() == buffer.getLineStartOffset(endLine)) {
+    endLine--;  // It is counterintuitive to process a line with no characters selected
+    textArea.setSelection(new Selection.Range(sel.getStart(), sel.getEnd() - 1));
+}
+
+StringBuilder output = new StringBuilder(buffer.getLineEndOffset(endLine) - buffer.getLineStartOffset(startLine) +
+				      (endLine - startLine)*2 + 100);
+
+int currentLine = startLine;
+
+// Our state-machine states
+final int BEFORE_PARAGRAPH_TEXT = 0, LOOKING_AT_TEXT = 1, LOOKING_AT_BLANKS = 2, SPITTING_PRE = 4;
+int state;
+
+int numBlanks;   // How many blank lines have we encountered when we're LOOKING_AT_BLANKS?
+String formattingOverride = "";
+boolean suppressNextIndentation = false;
+String line;  // current line of text
+StringBuilder parbuf = new StringBuilder();   // stores the current paragraph's text, trimmed.
+// }}}
+
+// {{{ Helper methods
+
+// 	{{{ isLineWhitespace()
+Pattern spacePattern = Pattern.compile("\\s*");
+
+boolean isLineWhitespace(String line) {
+    if (hashProcessing && line.equals("#")) {
+	insertHashNewline = true;  // tells the reader loop to put a newline in the output
+				   // on the next iteration.
+	return true;
+    } else {
+	return spacePattern.matcher(line).matches();
+    }
+}
+// }}}
+
+// 	{{{ expandEscapes()
+String expandEscapes(CharSequence input) {
+    if (!processEscapes)
+	return input.toString();
+
+    int n = input.length();
+    StringBuilder output = new StringBuilder(n * 2);
+    for (int i = 0; i < n; i++) {
+	char c = input.charAt(i);
+	if (c == '\\' && i < n-1) {
+	    char c2 = input.charAt(i+1);
+	    switch (c2) {
+	    case '\\':
+		output.append('\\');
+		break;
+	    case 't':
+		output.append('\t');
+		break;
+	    case 'n':
+		output.append('\n');
+		break;
+	    default:
+		output.append(c).append(c2);
+	    }
+	    i++;
+	} else {
+	    output.append(c);
+	}
+    }
+    return output.toString();
+}
+// }}}
+
+// 	{{{ putParbufInOutput()
+void putParbufInOutput(StringBuilder parbuf, StringBuilder output) {
+    if (parbuf.length() == 0)
+	return;
+    
+    // if we're inserting leading spaces, we need to account for them on the
+    // first pass through the hard line-breaking case.
+    int tab_size_first_line = 0;
+    
+    int old_tab_spaces = tab_spaces;  // we might overwrite this because of formattingOverride, etc.
+
+    // This test must be before, and disjoint from, the formattingOverride tests because
+    // they need to be able to, uhh, override it.
+    if (suppressNextIndentation)
+	tab_spaces = NO_TAB;
+    suppressNextIndentation = false;  // it's done its work; reset it for next time.
+
+    // But we might need to set it again if this paragraph is special.
+    if (indentationSuppressionPattern != null && parbuf.length() <= 72) {
+	Matcher m = indentationSuppressionPattern.matcher(parbuf);
+	if (m.matches()) {
+	    suppressNextIndentation = true;
+	    if (suppressCurrentIndentation)  // suppress ourselves
+		tab_spaces = NO_TAB;
+	}
+    }
+
+    if (formattingOverride.equals("|"))
+	tab_spaces = NO_TAB;
+    else if (formattingOverride.equals("|>"))
+	tab_spaces = TAB_CHAR;
+    		
+    if (output.length() != 0) {
+	for (int i = 0; i < newlines; i++)
+	    output.append('\n');
+    }
+    if (tab_spaces != NO_TAB) {
+	if (tab_spaces == TAB_CHAR) {
+	    output.append('\t');
+	    tab_size_first_line = 8;
+	} else if (tab_spaces > 0) {
+	    for (int i = 0; i < tab_spaces; i++)
+		output.append(' ');
+	    tab_size_first_line = tab_spaces;
+	}
+    }
+    switch (reflow) {
+    case REFLOW_SOFT:
+	output.append(expandEscapes(parbuf));  // Easy-mode.
+	break;
+    case REFLOW_HARD:
+	int startChar = 0, endChar;
+	int len = parbuf.length();
+	do {
+	    /* I already wrote this code, so let's try it out, but if it doesn't
+	       end up working well, I should rewrite it using a Scanner,
+	       StringTokenizer (as jEdit uses), or simply a String.split() on the parbuf text.
+	       
+	       The only potential problem with this code as-is, is that if a line
+	       is split at the end of a big patch of whitespace, the line being broken
+	       will be shorter than usual. So, umm, don't leave big runs of whitespace
+	       in your text.
+	    */
+	    
+	    if (startChar != 0) {
+		output.append('\n');
+		tab_size_first_line = 0;  // this is not the first line anymore
+	    }
+	    endChar = startChar + cols - tab_size_first_line;
+	    if (endChar >= len) {
+		output.append(expandEscapes(parbuf.substring(startChar)));
+		break;
+	    } else { // We're not at the end of the paragraph buffer, so look for a break.
+		// First we walk backward
+		while (endChar > startChar) {
+		    if (Character.isWhitespace(parbuf.charAt(endChar)))
+			break;
+		    endChar--;
+		}
+		if (endChar == startChar) {   // There was no whitespace on the entire line
+		    // So now we need to walk forward looking for a break.
+		    for (endChar = startChar + cols - tab_size_first_line; endChar < len; endChar++) {
+			if (Character.isWhitespace(parbuf.charAt(endChar)))
+			    break;
+		    }
+		}
+		output.append(expandEscapes(parbuf.substring(startChar, endChar).trim()));
+	    }
+	    startChar = endChar + 1;  // we know parbuf.charAt(endchar) is whitespace
+	    // skip over any whitespace at the point where we broke the line
+	    while (startChar < len && Character.isWhitespace(parbuf.charAt(startChar)))
+		startChar++;
+	} while (startChar < len);
+	
+	break;  // case REFLOW_HARD:
+    }
+    formattingOverride = "";
+    tab_spaces = old_tab_spaces;
+    parbuf.delete(0, parbuf.length());
+} // }}}
+
+// }}}
+
+// {{{ Main loop - Read in the input text, call putParbufInOutput for each paragraph
+state = BEFORE_PARAGRAPH_TEXT;
+while (currentLine <= endLine) {
+    line = buffer.getLineText(currentLine++);
+    
+    if (insertHashNewline) {
+	output.append('\n');
+	insertHashNewline = false;
+    }
+    
+    // We treat \begin{pre} specially to avoid mucking up the state machine.
+    if (line.equals("\\begin{pre}") && state != SPITTING_PRE) {
+	putParbufInOutput(parbuf, output);  // if there's anything in the parbuf, output it before
+					    // going into spit-mode.
+	// we output newlines - 1, because in SPITTING_PRE, a newline is prepending to the text
+	for (int i = 1; i < newlines; i++) 
+	    output.append('\n');
+	state = SPITTING_PRE;
+	continue;
+    }
+    
+    switch (state) {
+    case SPITTING_PRE:
+	if (line.equals("\\end{pre}")) {
+	    state = BEFORE_PARAGRAPH_TEXT;
+	} else {
+	    output.append('\n').append(line);
+	}
+	break;
+    case BEFORE_PARAGRAPH_TEXT:
+	if (!isLineWhitespace(line)) {
+	    // We've encountered a line with text on it; start building up our paragraph buffer.
+	    // But first we must check for our formatting prefixes.
+	    if (heedFormatting) {
+		for (String prefix : formattingPrefixes) {
+		    if (line.startsWith(prefix))
+			formattingOverride = prefix;
+		}
+	    }
+	    parbuf.append(line.substring(formattingOverride.length()).trim());
+
+	    if (blanks == 0)
+		putParbufInOutput(parbuf, output);  // and we stay in BEFORE_PARAGRAPH_TEXT
+	    else
+		state = LOOKING_AT_TEXT;  // Keep building up the current logical paragraph
+	} else {  // We're looking at a superabundance of blank lines between paragraphs
+	    if (!condenseBlanks)
+		output.append('\n');
+	    if (suppressIndentation)
+		suppressNextIndentation = true;
+	}
+	break;
+    case LOOKING_AT_TEXT:
+	if (!isLineWhitespace(line)) {
+	    parbuf.append(' ').append(line.trim());
+	} else { // This is a blank line
+	    if (blanks == 1) {
+		putParbufInOutput(parbuf, output);
+		state = BEFORE_PARAGRAPH_TEXT;
+	    } else {
+		numBlanks = 1;
+		state = LOOKING_AT_BLANKS;
+	    }
+	}
+	break;
+    case LOOKING_AT_BLANKS:   // We only get here if blanks > 1 and we've already read some text
+	if (isLineWhitespace(line)) {
+	    numBlanks++;
+	    if (numBlanks == blanks) {
+		putParbufInOutput(parbuf, output);
+		state = BEFORE_PARAGRAPH_TEXT;
+	    }
+	} else {  // some text, still in the same paragraph
+	    parbuf.append(' ').append(line.trim());
+	    state = LOOKING_AT_TEXT;
+	}
+	break;
+    }
+}
+putParbufInOutput(parbuf, output);
+// }}}
+
+// {{{ Save output text to appropriate register, and display message
+if (register == '~') {
+    textArea.setSelectedText(output.toString());
+} else {
+    Registers.setRegister(register, output.toString());
+    if (!quiet)
+	Macros.message(view, "Reformatted text copied to " + (register == '$' ? "the clipboard." : "register " + register));
+}
+// }}}
+
+/* ===================
+   ======= fin =======
+   =================== */
+
+// :folding=explicit:

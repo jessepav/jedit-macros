@@ -1,0 +1,12 @@
+// This is good for copy-and-paste'ing into, for instance, a word-processor.
+
+if (textArea.getSelectionCount() == 0)
+    return;
+
+Object savedRegisters = saveRegisterText("R");
+    
+Registers.setRegister('R', "reflow:s n1 t r$ q");
+File scriptFile = new File (new File(scriptPath).getParentFile(), "Reflow_Selection.bsh");
+Macros.runScript(view, scriptFile.getPath(), false);
+ 
+restoreRegisterText(savedRegisters);

@@ -1,0 +1,11 @@
+view.getInputHandler().readNextChar("Switch to buffer #:",
+	"int i;" +
+        "try {" +
+        "    i = Integer.parseInt(Character.toString(__char__));" +
+        "} catch (NumberFormatException ex) {" +
+        "    return;" +
+        "}" +
+        "BufferSet bs = editPane.getBufferSet();" +
+        "if (i >= 1 && i <= bs.size())" +
+        "    editPane.setBuffer(bs.getBuffer(i - 1));"
+        );

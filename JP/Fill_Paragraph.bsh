@@ -1,0 +1,142 @@
+/*
+Note: Apache Commons Lange v3.4 or higher must be installed.
+
+
+This is a fill paragraph macro that can fill certain types of paragraphs
+where the the average fill-paragraph command fails. Paragraphs like
+
+	Tab-indented with subsequent lines
+not indented.
+
+- Lists where a bullet marks the first
+  line but subsequent lines are indented.
+     * And then sublists with different
+       indentation levels.
+  
+To make the implementation of this macro easy, you have to invoke it with the
+cursor on the second or later lines of the paragraph. The macro looks at the
+indentation level of the current line, and uses that as the paragraph
+indentation; then it scans up until it finds a line with a different
+indentation, and this it considers the first line. The column where the first
+line ends is used as the column to break later lines of the paragraph (unless
+"JP.wrapmargin" is set: see below). Then, scanning downward, the end of the
+paragraph is the last line that has the same indentation level as the rest of
+the paragraph.
+
+To alter the line-length behavior, set the jEdit property "JP.wrapmargin" to an
+integer column at which to wrap text. Setting it to a negative value will have
+the macro use the buffer's maxLineLen. To get the default behavior, unset the
+property or set JP.wrapmargin=0.
+
+*/
+import org.apache.commons.lang3.StringUtils;
+
+
+int tabSize = buffer.getBooleanProperty("noTabs") ? 0 : buffer.getTabSize();
+int preordainedWrapMargin = jEdit.getIntegerProperty("JP.wrapmargin", 0);
+if (preordainedWrapMargin < 0)
+    preordainedWrapMargin = buffer.getIntegerProperty("maxLineLen", 0);
+
+int calculateIndentation(int lineNo)
+{
+    return StandardUtilities.getLeadingWhiteSpaceWidth(textArea.getLineText(lineNo), tabSize);
+}
+
+int findParStartLine(int i)
+{
+    int indentation = calculateIndentation(i);
+    i -= 1;
+    while (i >= 0) {
+	if (StringUtils.isBlank(textArea.getLineText(i)))
+	    return i+1;  // the line AFTER the blank line is the paragraph start
+	else if (calculateIndentation(i) != indentation)
+	    return i;
+	i -= 1;
+    }
+    return 0;
+}
+
+int findParEndLine(int i)
+{
+    int n = textArea.getLineCount();
+    int indentation = calculateIndentation(i);
+    i += 1;
+    while (i < n) {
+	if (calculateIndentation(i) != indentation || StringUtils.isBlank(textArea.getLineText(i)))
+	    return i - 1;
+	i++;
+    }
+    return n - 1;
+}
+
+// Returns an int array with these index values
+//  0 - the first line of the paragraph
+//  1 - the last line of the paragraph
+//  2 - the column at which to break lines (i.e. wrap margin)
+//  3 - the amount of indentation for the first line
+//  4 - the amount of indentation for subsequent lines
+int [] calculateParValues()
+{
+    int currentLine = textArea.getCaretLine();
+    int [] parvals = new int[5];
+    parvals[0] = findParStartLine(currentLine);
+    parvals[1] = findParEndLine(currentLine);
+    parvals[2] = preordainedWrapMargin != 0 ? preordainedWrapMargin :
+    		 calculateIndentation(parvals[0]) + textArea.getLineText(parvals[0]).trim().length();
+    parvals[3] = calculateIndentation(parvals[0]);
+    parvals[4] = calculateIndentation(currentLine);
+    return parvals;
+}
+
+String accumulateText(int firstLine, int lastLine)
+{
+    StringBuilder sb = new StringBuilder();
+    for (int i = firstLine; i <= lastLine; i++) {
+	if (i != firstLine)
+	    sb.append(' ');
+	sb.append(textArea.getLineText(i).trim());
+    }
+    return sb.toString();
+}
+
+String reformatText(String text, int lastCol, int firstIndent, int indentation)
+{
+    StringBuilder sb = new StringBuilder();
+    String [] words = text.split("\\s+");
+    int currentWord = 0;
+    int currentLineLength = 0;
+    while (currentWord < words.length) {
+	if (currentWord != 0)
+	    sb.append('\n');
+	if (currentLineLength == 0) {
+	    int indentAmount = currentWord == 0 ? firstIndent : indentation;
+	    sb.append(StandardUtilities.createWhiteSpace(indentAmount, tabSize));
+	    currentLineLength += indentAmount;
+	    // Always insert at least one word on a line.
+	    sb.append(words[currentWord]);
+	    currentLineLength += words[currentWord].length();
+	    currentWord++;
+	}
+	while (currentWord < words.length && currentLineLength + 1 + words[currentWord].length() <= lastCol) {
+	    sb.append(' ').append(words[currentWord]);
+	    currentLineLength += words[currentWord].length() + 1;
+	    currentWord++;
+	}
+	currentLineLength = 0;
+    }
+    return sb.toString();
+}
+
+void formatParagraph()
+{
+    int [] parVals = calculateParValues();
+    // Macros.message(view, "parVals: " + parVals[0] + ", " + parVals[1] + ", " + parVals[2] + ", " + parVals[3]);
+    int firstLine = parVals[0], lastLine = parVals[1], lastCol = parVals[2], firstIndent = parVals[3], indentation = parVals[4];
+    if (firstLine == lastLine)
+	return;		// a one-line paragraph is the degenerate case
+    String parText = accumulateText(firstLine, lastLine);
+    textArea.setSelection(new Selection.Range(textArea.getLineStartOffset(firstLine), textArea.getLineEndOffset(lastLine)-1));
+    textArea.setSelectedText(reformatText(parText, lastCol, firstIndent, indentation));
+}
+
+formatParagraph();

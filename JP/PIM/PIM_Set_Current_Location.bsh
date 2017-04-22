@@ -1,0 +1,18 @@
+import org.joda.time.LocalDate;
+
+
+Macros.getMacro("JP/PIM/PIM_Goto_Current_Todo").invoke(view);
+
+int l = textArea.getCaretLine();
+
+String markerText = textArea.getLineText(l);
+textArea.deleteLine();
+
+l = pimGetEntryLine(l, textArea.getLineCount(), LocalDate.now().plusDays(1), textArea);
+if (l == textArea.getLineCount()) {
+    textArea.setCaretPosition(textArea.getLineEndOffset(l-1));
+    textArea.setSelectedText("\n");  // open a blank line to stick our entry
+}
+textArea.setCaretPosition(textArea.getLineStartOffset(l));
+textArea.setSelectedText(markerText + "\n");
+textArea.setCaretPosition(textArea.getLineStartOffset(l));

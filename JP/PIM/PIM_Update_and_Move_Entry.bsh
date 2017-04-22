@@ -1,0 +1,2 @@
+Macros.getMacro("JP/PIM/PIM_Update_Entry_Date").invoke(view);
+Macros.getMacro("JP/PIM/PIM_Move_Current_Entry").invoke(view);

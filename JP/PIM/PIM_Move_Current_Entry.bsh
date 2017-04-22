@@ -1,0 +1,71 @@
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.util.regex.*;
+
+import org.apache.commons.lang3.StringUtils;
+
+// Okay, first we find the first and last lines of the current entry.
+int firstLine = -1, lastLine = -1;
+String entryDateString = null, entryRepString = null;
+LocalDate entryDate = null;
+
+int l = textArea.getCaretLine();
+while (l >= 0) {
+    String s = textArea.getLineText(l);
+    if (s.length() == 0)
+    	break;
+    Matcher m = pimDateLinePattern.matcher(s);
+    if (m.lookingAt()) {
+    	firstLine = l;
+    	entryDateString = StringUtils.defaultString(m.group(1));
+    	entryRepString = StringUtils.defaultString(m.group(2));
+    	break;
+    }
+    l--;
+}
+if (firstLine < 0)
+    return;  // we're not even on a PIM entry
+try { entryDate = pimDateFormatter.parseLocalDate(entryDateString); } 
+catch (IllegalArgumentException ex) { entryDate = null; }
+if (entryDate == null)
+    return;  // if we can't parse the date, then there's no hope
+
+int l = textArea.getCaretLine() + 1;
+int n = textArea.getLineCount();
+while (l < n) {
+    String s = textArea.getLineText(l);
+    if (s.length() == 0 || s.startsWith(pimCurrentDateString))  // a blank line, or the current PIM position,
+    	break;						  	// also indicates the end of an entry
+    Matcher m = pimDateLinePattern.matcher(s);
+    if (m.lookingAt())
+    	break;
+    l++;
+}
+lastLine = l - 1;
+
+// Macros.message(view, "First line: " + firstLine + "\nLast line: " + lastLine);
+
+int caretPos = textArea.getCaretPosition();
+
+// Yank out the current entry
+textArea.setSelection(new Selection.Range(textArea.getLineStartOffset(firstLine),
+    					  textArea.getLineStartOffset(lastLine+1)));
+String entry = textArea.getSelectedText();
+textArea.setSelectedText("");
+
+// Look up to find the beginning of the paragraph that held the extracted entry
+int parstart = 0;
+for (parstart = firstLine; parstart > 0; parstart--)
+    if (StringUtils.isWhitespace(textArea.getLineText(parstart - 1)))
+    	break;
+
+l = pimGetEntryLine(parstart, textArea.getLineCount(), entryDate, textArea);
+if (l == textArea.getLineCount()) {  // we need to append the entry to the end of the buffer
+    textArea.setCaretPosition(textArea.getLineEndOffset(l-1));
+    textArea.setSelectedText("\n");  // open a blank line to stick our entry
+}
+textArea.setCaretPosition(textArea.getLineStartOffset(l));
+textArea.setSelectedText(entry);
+textArea.setCaretPosition(caretPos);

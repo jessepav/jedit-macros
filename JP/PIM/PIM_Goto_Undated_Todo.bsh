@@ -1,0 +1,7 @@
+SearchAndReplace.setSearchString("^Undated:");
+SearchAndReplace.setAutoWrapAround(true);
+SearchAndReplace.setWholeWord(false);
+SearchAndReplace.setRegexp(true);
+SearchAndReplace.setSearchFileSet(new CurrentBufferSet());
+SearchAndReplace.find(view);
+textArea.goToStartOfLine(false);

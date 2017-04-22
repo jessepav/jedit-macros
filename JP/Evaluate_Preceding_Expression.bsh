@@ -1,0 +1,30 @@
+int caretPos = textArea.getCaretPosition();
+int caretLine = textArea.getCaretLine();
+int caretCol = caretPos - textArea.getLineStartOffset(caretLine);
+String line = textArea.getLineText(caretLine);
+
+int i;
+boolean dollars = false;
+for (i = caretCol - 1; i >= 0; i--) {
+    char c = line.charAt(i);
+    if (c == '$' || Character.isWhitespace(c)) {
+	dollars = (c == '$');
+	break;
+    }
+}
+// 'i' should now be the column # at which we found a '$' or whitespace.
+// We want to evaluate everything between the caret (exclusive) and i+1
+int n = caretCol - (i + 1);
+int start = caretPos - n;
+
+// textArea.setSelectedText("\n" + caretCol + ", " + i + ", " + n + ", " + caretPos);
+// return;
+
+textArea.setSelection(new Selection.Range(start, caretPos));
+String s = textArea.getSelectedText().replace(",", "");
+String result = BeanShell.eval(view,BeanShell.getNameSpace(), s).toString();
+if (dollars) { // let's round to the nearest cent; we assume the result was a number
+    java.text.NumberFormat format = new java.text.DecimalFormat("###,##0.00");
+    result = format.format(Float.valueOf(result));
+}
+textArea.setSelectedText(result);
