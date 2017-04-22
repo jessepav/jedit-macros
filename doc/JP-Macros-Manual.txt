@@ -1,0 +1,88 @@
+
+                         _.----------------.
+                   _.--''                   `----.
+               ,-''                               `--.
+            ,-'                                       `-.
+           /   _ ___     _  _ ____ ____ ____ ____ ____   \
+         ,'    | |__]    |\/| |__| |    |__/ |  | [__     `.
+        ;     _| |       |  | |  | |___ |  \ |__| ___]      :
+        |                                                   |
+        :           _  _ ____ _  _ _  _ ____ _              ;
+         `.         |\/| |__| |\ | |  | |__| |            ,'
+           \        |  | |  | | \| |__| |  | |___        /
+            `-.                                       ,-'
+               `--.                               _.-'
+                   `----.                   _.--''
+                         `----------------''
+
+
+== Add_Abbrev.bsh ==
+
+  This macro behaves like the built-in Expand Abbrev command, except
+  that it forces the display of the Add Abbrev Dialog even if an
+  expansion for the abbreviation before the cursor already exists.
+
+
+== Align_on_Character.bsh ==
+
+    [ This was based on the original Beautify Text Table by Corin ]
+    [ Langosch, and heavily modified to add many more features.   ]
+    
+     USAGE
+   ..-------''
+   
+  The macro operates on a selection, so you'll eventually need to
+  select a block of text before invoking it.
+  
+  Put a command string in the '|' (vertical bar) register, in this
+  format:
+  
+    /split regexp/delimiter/flags/column-spec/padding-char
+
+    (flags, column-spec, and padding-char are optional)
+  
+  The '/' in the above line can actually be any non-alphabetic character
+  that will be used to mark the boundaries between the various parts of
+  the command string. Choose something that's not in your split regexp
+  or delimiter!
+  
+  The 'flags' can include
+  
+    B	Adds a delimter at the beginning of each line
+    E	Adds padding and a delimiter at the end of each line
+    T   Trims whitespace from the whole line before writing it to
+        the buffer. Useful if your delimiter has whitespace,
+        but you only want it between columns.
+  
+  The column-spec allows you to left-, right-, or center-align the
+  various columns of your input. Use a string of "L", "R", or "C", one
+  for each column. If your input has fewer columns than the spec, the
+  extras are ignored; and if your input has more columns, the default
+  left-alignment is used.
+  
+  padding-char, if included, will be used instead of a space character
+  to pad your columns.
+  
+  Example:
+  
+    /,\s+/ | /EBT/LLRC/*
+  
+  Parsed: <split char> = '/', split regexp = ",\\s+", delimiter = " | ",
+          flags = "EBT", col-spec = "LLRC", padding-char="*"
+  
+  The defaults, used if the command-string register is empty,
+  are "\t", " ", no flags, left-alignment, and spaces, respectively. 
+  
+== Align_on_Comma.bsh ==
+
+  A convenience macro for Align_on_Character, that aligns the columns
+  of your select text by lining up the commas, and separating them
+  with three spaces.
+
+== Align_on_Prompted_Character.bsh ==
+
+  Another convenience macro for Align_on_Character. It will prompt
+  you for a keypress, and then use that punctuation character (regular
+  letters or numbers won't work) to use as the delimeter of the columns
+  in your selected text.
+

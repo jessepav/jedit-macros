@@ -15,3 +15,6 @@
    use or modify them as you see fit--if
    you make improvements, please let me
    know!
+
+   Documentation is found in the "doc"
+   subdirectory.
