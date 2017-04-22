@@ -86,3 +86,109 @@
   letters or numbers won't work) to use as the delimeter of the columns
   in your selected text.
 
+== Box_Selection.bsh ==
+
+  This macro draws a box within the border of a rectangular selection
+  using Unicode box drawing characters. It can draw a variety of box
+  styles, depending on the value of the "JP.boxstyle" jEdit property.
+  By default, it will draw single-lined boxes using Unicode
+  characters. Set JP.boxstyle to "double" for double-line boxes,
+  "rounded" for rounded-corners, or "ditaa" or "ascii" for an
+  ASCII-only style compatible with the ditaa diagram tool
+  (ditaa.sourceforge.net).
+
+== Reflow_Selection.bsh ==
+
+  This is a big macro!
+  
+  It can reflow text in a variety of ways, and will save the reflowed
+  text to a register (recall that the special register '$' represents
+  the system clipboard); alternately, this macro treats the register
+  name "~" specially, and will replace the selection with the reflowed
+  text rather than saving it.
+  
+  It pops up an input dialog to let the user choose what type of reflow
+  it should perform. Options are separated by spaces, and can be listed
+  in any order. Options may also be passed to the script, preventing
+  the popup, by loading a string into register 'R' of the format
+  "reflow:<options>".
+  
+  Options:
+  ---------------------------------------------------------
+  
+  s     Soft reflow. This will join together lines that are not
+        separated by a blank line into one logical paragraph.
+        Such paragraphs are then separated from each other by a
+        single newline. This method is good if you're going to
+        import the resulting text to another program that
+        performs its own line-wrapping, such as email,
+        word-processors, etc. If <cols> is given, then lines
+        that are shorter than <cols> will NOT be reformatted,
+        and will be passed through into the output as-is.
+  
+  h<cols>  Hard reflow. This considers a group of lines that are not
+           separated by a blank line as a logical paragraph, and
+           joins them together into one block of text with <cols>
+           columns. If <cols> isn't given, then the default of 72 is
+           used.
+  
+  t<s>  Tabs. If this option is present, each paragraph will be indented
+        by a tab character. For hard reflow, a tab is considered 8
+        characters. If <s> is given, then instead of a tab character <s>
+        spaces will be used to lead paragraphs.
+  
+  b<n>  How many blank lines (<n>) separate logical paragraphs in the
+        input text? The default is 1. Note that if you set this to 0,
+        then every non-blank line is considered a paragraph.
+  
+  n<i>  Separates paragraphs in the output using <i> newlines. The
+        default is to use 2 newlines (a blank line).
+  
+  c     Condense blank lines between paragraphs into one separator.
+        Without this option, if, say, you pass b1 and n2, and two
+        input paragraphs are separated by three blank lines, two
+        additional newlines will be passed through to the output.
+  
+  S<pd=>  Suppress indentation on multiple blank lines. What this means
+          is that if the input contains more blank lines than necessary
+          (b<n>) to separate two paragraphs, the indentation for the
+          second paragraph will be suppressed, like the first paragraph
+          of a section in books.
+             Additionally, if the argument is given as "Sp", a paragraph
+          consisting entirely of punctuation (that is, \p{Punct} from
+          the Pattern class) and whitespace, and which is less than 72
+          characters long, will cause the *next* paragraph to have its
+          indentation suppressed. "Spd" will do the same, but will
+          include digits ("\d") in the regexp.
+             If you append an "=" to the suppression option (ex. "Sp="),
+          then the paragraph that triggered suppression will have its
+          own indentation suppressed as well.
+  
+  f     Recognize special formatting marks in the input text. Currently
+        these include two special character sequences at the start of
+        an input line that control the indentation for that paragraph,
+        overriding the defaults:
+        
+            "|"   Do not indent this paragraph.
+            "|>"  Indent this paragraph using a tab.
+  
+  e     Enables escape sequence processing in each paragraph's text.
+        This is similar to escape sequences in Java string literals.
+        Currently recognized escapes are: \t, \n, \\
+  
+  #   Enable hash-mark processing; with this option, a line consisting
+      of only a hash mark will be treated as a blank line for
+      paragraph delimitation, but will additionally insert a newline
+      into the output. It can be used to make the layout of the source
+      text more closely match the output. Note that using this option
+      with b<n> where n>1 will lead to odd results.
+  
+  r<c>  Put the output into register <c>. Note that '$' is the system
+        clipboard, the default.
+  
+  q     Quiet. Suppresses the completion message.
+  ----------------------------------------------------
+  
+  To prevent a section of text from being reformatted, enclose it
+  between a "\begin{pre}" and "\end{pre}" on lines by themselves. The
+  \begin{pre} and \end{pre} will not be included in the output.

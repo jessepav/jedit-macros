@@ -59,6 +59,7 @@ if (s != null) {
 	    boxChars = roundedBoxChars;
 	    break;
 	case "ditaa":
+	case "ascii":
 	    boxChars = ditaaBoxChars;
 	    break;
 	default:
