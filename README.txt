@@ -24,11 +24,6 @@
    Put "JP_Macro_Utils.bsh" in your "startup"
    folder (in the jEdit settings directory).
    
-   The CamelComplete, PIM, Movement, and Specific
-   subdirectories are for use with my own plugins
-   or specialized files, and probably aren't too
-   interesting to the general populace.
-
    Documentation is found in the "doc"
    directory. JARs that some macros depend
    on are in the "jars" directory.
@@ -42,5 +37,6 @@
      Evaluate Preceding Expression
      Fill Paragraph
      Insert Line Below
+     Reflow Selection (Quickstart: use Copy as Softflow)
      Repeat Character
 
