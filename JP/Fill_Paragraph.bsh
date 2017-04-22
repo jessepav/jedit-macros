@@ -1,34 +1,3 @@
-/*
-Note: Apache Commons Lang v3.4 or higher must be installed.
-
-
-This is a fill paragraph macro that can fill certain types of paragraphs
-where the the average fill-paragraph command fails. Paragraphs like
-
-	Tab-indented with subsequent lines
-not indented.
-
-- Lists where a bullet marks the first
-  line but subsequent lines are indented.
-     * And then sublists with different
-       indentation levels.
-  
-To make the implementation of this macro easy, you have to invoke it with the
-cursor on the second or later lines of the paragraph. The macro looks at the
-indentation level of the current line, and uses that as the paragraph
-indentation; then it scans up until it finds a line with a different
-indentation, and this it considers the first line. The column where the first
-line ends is used as the column to break later lines of the paragraph (unless
-"JP.wrapmargin" is set: see below). Then, scanning downward, the end of the
-paragraph is the last line that has the same indentation level as the rest of
-the paragraph.
-
-To alter the line-length behavior, set the jEdit property "JP.wrapmargin" to an
-integer column at which to wrap text. Setting it to a negative value will have
-the macro use the buffer's maxLineLen. To get the default behavior, unset the
-property or set JP.wrapmargin=0.
-
-*/
 import org.apache.commons.lang3.StringUtils;
 
 

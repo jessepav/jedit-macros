@@ -7,41 +7,6 @@
 * to join the columns with a configurable delimiter, to allow for different
 * horizontal column alignments, and padding with other characters than spaces.
 * 
-* ===== USAGE =====
-* 
-* Put a command string in the '|' (vertical bar) register in this format:
-* 
-*   /split regexp/delimiter/flags/column-spec/padding-char
-*                         [    these items are optional   ]
-* 
-* The '/' in the above line can actually be any non-alphabetic character that will
-* be used to mark the boundaries between the various parts of the command string.
-* Choose something that's not in your split regexp or delimiter!
-* 
-* The 'flags' can include
-* 
-*   B	Adds a delimter at the start of each line
-*   E	Adds padding and a delimiter at the end of each line
-*   T	Trims whitespace from the whole line before writing it to the buffer.
-*	Useful if your delimiter has whitespace, but you only want it between columns.
-*
-* The column-spec allows you to left-, right-, or center-align the various columns
-* of your input. Use a string of "L", "R", or "C", one for each column. If your input
-* has fewer columns than the spec, the extras are ignored; and if your input has
-* more columns, the default left-alignment is used.
-* 
-* padding-char, if included, will be used instead of a space character to pad your columns. 
-*
-* Example:
-* 
-*   /,\s+/ | /EBT/LLRC/*
-*
-*     Parsed: <split char> = '/', split regexp = ",\\s+", delimiter = " | ", flags = "EBT",
-*	      col-spec = "LLRC", padding-char="*"
-* 
-* The defaults, used if the command-string register is empty,
-* are "\t", " ", no flags, left-alignment, and spaces, respectively.
-* 
 * Jesse Pavel (jpavel@alum.mit.edu) - 2015/04/12
 *
 *******************************************************************************/
@@ -187,32 +152,8 @@ if (text != null) {
   }
   textArea.setSelectedText(t.toString());
 } else {
-  Macros.message(view,
-	"Put a command string in the '|' (vertical bar) register in this format:                  \n" +
-	"                                                                                         \n" +
-	"  /split regexp/delimiter/flags/column-spec/padding-char                                 \n" +
-	"                                                                                         \n" +
-	"                    (flags, column-spec, and padding-char are optional)                  \n" +
-	"                                                                                         \n" +
-	"The '/' in the above line can actually be any non-alphabetic character that will         \n" +
-	"be used to mark the boundaries between the various parts of the command string.          \n" +
-	"Choose something that's not in your split regexp or delimiter!                           \n" +
-	"                                                                                         \n" +
-	"The 'flags' can include                                                                  \n" +
-	"                                                                                         \n" +
-	"  B   Adds a delimter at the start of each line                                          \n" +
-	"  E   Adds padding and a delimiter at the end of each line                               \n" +
-	"  T   Trims whitespace from the whole line before writing it to the buffer.              \n" +
-	"      Useful if your delimiter has whitespace, but you only want it between columns.     \n" +
-	"                                                                                         \n" +
-	"The column-spec allows you to left-, right-, or center-align the various columns         \n" +
-	"of your input. Use a string of \"L\", \"R\", or \"C\", one for each column. If your input\n" +
-	"has fewer columns than the spec, the extras are ignored; and if your input has           \n" +
-	"more columns, the default left-alignment is used.                                        \n" +
-	"                                                                                         \n" +
-	"padding-char, if included, will be used instead of a space character to pad your         \n" +
-	"columns.                                                                                 \n" +
-	"\n==    Then select some text and invoke this macro again.    ==");
+  Macros.message(view, "See\n\n   https://goo.gl/di0JH2\n\n   " +
+  	"(That's \"dee eye zero capital-jay capital-aitch two\")" + "\n\nfor documentation!");
 }
   
 // }}}

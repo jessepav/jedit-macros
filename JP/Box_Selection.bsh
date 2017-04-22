@@ -1,16 +1,4 @@
-/* 
-
-This macro draws a box within the border of a rectangular selection
-using Unicode box drawing characters. It can draw a variety of box
-styles, depending on the value of the "JP.boxstyle" jEdit
-property. Set JP.boxstyle to "double" for double-line boxes,
-"rounded" for rounded-corners, or "ditaa" for a style compatible
-with the ditaa diagram tool (http://ditaa.sourceforge.net/)
-
-Jesse Pavel (jesse@humidmail.com)
-
-
-*/
+// Jesse Pavel (jesse@humidmail.com)
 
 if (textArea.getSelectionCount() == 0 || !(textArea.getSelection(0) instanceof Selection.Rect)) {
     Macros.error(view, "You need to make a rectangular selection (Ctrl + mouse drag) first.");
