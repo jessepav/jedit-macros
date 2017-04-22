@@ -15,6 +15,9 @@
                    `----.                   _.--''
                          `----------------''
 
+    (Not all the macros are documented here, but only the generally
+     useful ones.)
+
 
 == Add_Abbrev.bsh ==
 
@@ -48,8 +51,8 @@
   
   The 'flags' can include
   
-    B	Adds a delimter at the beginning of each line
-    E	Adds padding and a delimiter at the end of each line
+    B   Adds a delimter at the beginning of each line
+    E   Adds padding and a delimiter at the end of each line
     T   Trims whitespace from the whole line before writing it to
         the buffer. Useful if your delimiter has whitespace,
         but you only want it between columns.
@@ -100,7 +103,9 @@
   ASCII-only style compatible with the ditaa diagram tool
   (ditaa.sourceforge.net).
 
-  Examples:
+  Examples (if these look messed up, download this .txt file and open
+            it in an editor that can properly display Unicode
+            characters in a monospaced font)
 
      ┌────────────┐
      │  BOXES!    │
@@ -118,12 +123,23 @@
     ║      5            ║      Moderate        ║
     ║     32            ║      Incredibly      ║
     ╚═══════════════════╩══════════════════════╝
-                     Tables!
+                Double-Walled Table
+
+    +-------------------+----------------------+
+    |    FACT #         |   HOW FASCINATING?   |
+    +-------------------+----------------------+ 
+    |    232            |      Not too much    |
+    |    993            |      A Little        |
+    |      5            |      Moderate        |
+    |     32            |      Incredibly      |
+    +-------------------+----------------------+
+                   ASCII Table
 
 
 == Reflow_Selection.bsh ==
 
-  This is a big macro!
+  This is a big macro! If it's daunting, start by using the
+  Copy_as_Softflow.bsh helper.
   
   It can reflow text in a variety of ways, and will save the reflowed
   text to a register (recall that the special register '$' represents
@@ -266,3 +282,8 @@
     6. Milk                       14. Milk     
     8. Beefsteak                  15. Beefsteak
 
+
+
+
+----------------------------------------------------------------------
+:noTabs=true:
