@@ -8,20 +8,37 @@ untoward places.
 Here's a table of the line #'s corresponding to the last line on each
 page from 1-32, to save mental calculation energy later on
 
-
-      Page  1, Line 56            Page 17, Line 952
-      Page  2, Line 112           Page 18, Line 1008
-      Page  3, Line 168           Page 19, Line 1064
-      Page  4, Line 224           Page 20, Line 1120
-      Page  5, Line 280           Page 21, Line 1176
-      Page  6, Line 336           Page 22, Line 1232
-      Page  7, Line 392           Page 23, Line 1288
-      Page  8, Line 448           Page 24, Line 1344
-      Page  9, Line 504           Page 25, Line 1400
-      Page 10, Line 560           Page 26, Line 1456
-      Page 11, Line 616           Page 27, Line 1512
-      Page 12, Line 672           Page 28, Line 1568
-      Page 13, Line 728           Page 29, Line 1624
-      Page 14, Line 784           Page 30, Line 1680
-      Page 15, Line 840           Page 31, Line 1736
-      Page 16, Line 896           Page 32, Line 1792
+Page  Line
+----------
+ 1     56
+ 2     112
+ 3     168
+ 4     224
+ 5     280
+ 6     336
+ 7     392
+ 8     448
+ 9     504
+10     560
+11     616
+12     672
+13     728
+14     784
+15     840
+16     896
+17     952
+18     1008
+19     1064
+20     1120
+21     1176
+22     1232
+23     1288
+24     1344
+25     1400
+26     1456
+27     1512
+28     1568
+29     1624
+30     1680
+31     1736
+32     1792
