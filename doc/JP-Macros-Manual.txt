@@ -73,11 +73,13 @@
   The defaults, used if the command-string register is empty,
   are "\t", " ", no flags, left-alignment, and spaces, respectively. 
   
+
 == Align_on_Comma.bsh ==
 
   A convenience macro for Align_on_Character, that aligns the columns
   of your select text by lining up the commas, and separating them
   with three spaces.
+
 
 == Align_on_Prompted_Character.bsh ==
 
@@ -85,6 +87,7 @@
   you for a keypress, and then use that punctuation character (regular
   letters or numbers won't work) to use as the delimeter of the columns
   in your selected text.
+
 
 == Box_Selection.bsh ==
 
@@ -96,6 +99,7 @@
   "rounded" for rounded-corners, or "ditaa" or "ascii" for an
   ASCII-only style compatible with the ditaa diagram tool
   (ditaa.sourceforge.net).
+
 
 == Reflow_Selection.bsh ==
 
@@ -192,3 +196,53 @@
   To prevent a section of text from being reformatted, enclose it
   between a "\begin{pre}" and "\end{pre}" on lines by themselves. The
   \begin{pre} and \end{pre} will not be included in the output.
+
+
+== Copy_as_Softflow.bsh ==
+
+  A convenience macro for Reflow_Selection, that copies the selection
+  to the clipboard as soft-flowed paragraphs separated by a blank line.
+  (see the "s" option for Reflow_Selection above).
+
+
+== Copy_as_Tabflow.bsh ==
+
+  A convenience macro for Reflow_Selection, that copies the selection
+  to the clipboard as soft-flowed paragraphs with a tab at the start
+  of each, not separated by any blank lines (see the 's', 't', & 'n'
+  options for Reflow_Selection above).
+
+
+== Enumerate_Lines.bsh ==
+
+  Makes numbering lists in text documents much easier.
+  
+  The macro operates on your current selection.
+  
+  You can use it both to create new numbered lists:
+                                  
+    Eggs                           1. Eggs
+    Cheese             ====>       2. Cheese
+    Milk                           3. Milk
+    Beefsteak                      4. Beefsteak
+
+  or to renumber already-enumerated lists if you insert
+  or delete items.
+  
+    1. Eggs                        1. Eggs                     
+    2. Cheese                      2. Cheese
+    2. Cereal               ===>   3. Cereal
+       Wheeties, Cheerios             Wheeties, Cheerios
+    3. Milk                        4. Milk
+    4. Beefsteak                   5. Beefsteak
+
+  Notice that it only renumbered lines that already had a number,
+  allowing you to use this macro on lists where certain items
+  span more than one line. The only numerical value that it
+  considers is that of the first item in your selection. Thus,
+
+    12. Eggs                      12. Eggs
+    3. Cheese         =====>      13. Cheese   
+    6. Milk                       14. Milk     
+    8. Beefsteak                  15. Beefsteak
+
