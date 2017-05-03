@@ -350,6 +350,17 @@
   it to a negative value will have the macro use the buffer's
   maxLineLen. To get the default behavior (i.e. using the length of
   the first line), unset the property or set JP.wrapmargin=0.
+  
+  Note that if JP.wrapmargin=0, then the first line of the
+  paragraph--the one that is used to determine line length--will not
+  be reflowed; its whitespace will be kept intact. This is useful
+  for situations like this example, where whitespace is used to align
+  description text:
+  
+    Item Alpha - This is the first item
+                 in the series.
+    Item Beta  - This is the second item in
+                 the series
 
 
 == Insert_Line_Below.bsh ==
@@ -391,4 +402,4 @@
   in order.
 
 ----------------------------------------------------------------------
-:noTabs=true:
+:noTabs=true:autoIndent=simple:

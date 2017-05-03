@@ -103,6 +103,10 @@ void formatParagraph()
     int firstLine = parVals[0], lastLine = parVals[1], lastCol = parVals[2], firstIndent = parVals[3], indentation = parVals[4];
     if (firstLine == lastLine)
 	return;		// a one-line paragraph is the degenerate case
+    if (preordainedWrapMargin == 0) {  // in this case we *won't* reflow the first line!
+    	firstLine++;
+    	firstIndent = indentation;
+    }
     String parText = accumulateText(firstLine, lastLine);
     textArea.setSelection(new Selection.Range(textArea.getLineStartOffset(firstLine), textArea.getLineEndOffset(lastLine)-1));
     textArea.setSelectedText(reformatText(parText, lastCol, firstIndent, indentation));
