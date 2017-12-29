@@ -401,5 +401,11 @@
   plugins (I use Buffer Selector) that shows you your open buffers
   in order.
 
+== Title_Case_Selection.bsh ==
+
+  Converts selected text to Title Case (that is, it capitalizes the first
+  letter of each word and uncapitalizes all subsequent letters). Words
+  are separated by spaces or underscores.
+
 ----------------------------------------------------------------------
 :noTabs=true:autoIndent=simple:

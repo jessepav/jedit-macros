@@ -1,0 +1,9 @@
+// Note that you'll need the .jar for Apache Commons Lang v3 in your jEdit jars directory before
+// using this macro.
+
+import org.apache.commons.lang3.text.WordUtils;
+
+if (textArea.getSelectionCount() > 0) {
+    String s = textArea.getSelectedText();
+    textArea.setSelectedText(WordUtils.capitalizeFully(s, new char[] {' ', '_'}));
+}
