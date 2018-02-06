@@ -107,9 +107,11 @@ void formatParagraph()
     	firstLine++;
     	firstIndent = indentation;
     }
+    int cp = textArea.getCaretPosition();
     String parText = accumulateText(firstLine, lastLine);
     textArea.setSelection(new Selection.Range(textArea.getLineStartOffset(firstLine), textArea.getLineEndOffset(lastLine)-1));
     textArea.setSelectedText(reformatText(parText, lastCol, firstIndent, indentation));
+    textArea.setCaretPosition(cp);
 }
 
 formatParagraph();
