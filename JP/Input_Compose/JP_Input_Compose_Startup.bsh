@@ -1,6 +1,6 @@
 // Put this script in the "startup" directory of your jEdit settings directory.
 // To reload while editing:
-// 	BeanShell.runScript(view,buffer.getPath(),null,false);
+//      BeanShell.runScript(view,buffer.getPath(),null,false);
 
 HashMap JPInputComposeHashMap = new HashMap();
 
@@ -12,22 +12,22 @@ void JPInputComposeLoadTable(File tableFile) {
     BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(tableFile), "UTF-8"));
     String line;
     while ((line = r.readLine()) != null) {
-	if (line.length() < 3 || line.startsWith("# ") || line.matches("\\s+"))
-	    continue;
-	line = line.trim();
-	String[] pieces = line.split("\\s+", 2);
-	if (pieces.length != 2) continue;   // This is a malformed line, ignore it.
-	
-	// The various types of entries we can find are:
-	// A Unicode code point written in hex
-	if (pieces[1].matches("U\\+(?:10)?\\p{XDigit}{4}"))  {
-	    pieces[1] = new String(Character.toChars(Integer.parseInt(pieces[1].substring(2), 16)));
-	} else if (pieces[1].length() >= 7 && pieces[1].endsWith("FUNC")) {   // This is valid (x)FUNC syntax.
-	    // We'll stash it as a normal substitution for now, and let JPInputComposeExpandInput deal with the nitty gritty.
-	    JPInputComposeHashMap.put(pieces[0], pieces[1]);
-	} else {  // The default, a normal textual substitution.
-	    JPInputComposeHashMap.put(pieces[0], pieces[1]);
-	}
+        if (line.length() < 3 || line.startsWith("# ") || line.matches("\\s+"))
+            continue;
+        line = line.trim();
+        String[] pieces = line.split("\\s+", 2);
+        if (pieces.length != 2) continue;   // This is a malformed line, ignore it.
+        
+        // The various types of entries we can find are:
+        // A Unicode code point written in hex
+        if (pieces[1].matches("U\\+(?:10)?\\p{XDigit}{4}"))  {
+            pieces[1] = new String(Character.toChars(Integer.parseInt(pieces[1].substring(2), 16)));
+        } else if (pieces[1].length() >= 7 && pieces[1].endsWith("FUNC")) {   // This is valid (x)FUNC syntax.
+            // We'll stash it as a normal substitution for now, and let JPInputComposeExpandInput deal with the nitty gritty.
+            JPInputComposeHashMap.put(pieces[0], pieces[1]);
+        } else {  // The default, a normal textual substitution.
+            JPInputComposeHashMap.put(pieces[0], pieces[1]);
+        }
     }
     r.close();
 }
@@ -46,41 +46,41 @@ void JPInputComposeAtCaret(int maxCompositionLength, JEditTextArea textArea) {
     int caretCol = caretPos - textArea.getLineStartOffset(caretLine);
     int compositionLength = Math.min(maxCompositionLength, caretCol);
     if (compositionLength < 2)
-	return;
+        return;
     String line = textArea.getLineText(caretLine);
     for (int l = compositionLength; l >= 2; l--) {
-	String token = line.substring(caretCol - l, caretCol);
-	String replacement = JPInputComposeExpandInput(token);
-	if (replacement != null) {
-	    if (replacement.length() >= 7 && replacement.endsWith("FUNC")) {  // It's a function, boi! {{{
-		char openDelimeter = replacement.charAt(0),
-		    closeDelimeter = replacement.charAt(replacement.length() - 5);  // character right before "FUNC"
-		int col = caretCol - token.length() - 2;  // start right before the closing delimeter
-		int endCol = col + 1;
-		int startCol = -1;  // this is what we're searching for
-		int delimeterCount = 1;
-		while (delimeterCount > 0) {  // we scan backward until the delimeters are balanced
-		    if (col < 0) return;  // the function invocation is malformed
-		    if (line.charAt(col) == openDelimeter)
-			delimeterCount--;
-		    else if (line.charAt(col) == closeDelimeter)
-			delimeterCount++;
-			
-		    if (delimeterCount == 0)
-			startCol = col + 1;
-		    else if (--col < 0)  // The delimeters did not match up; this is a malformed function call.
-			return;  // so just do nothing
-		}
-		// If we reached this spot, the delimeters balanced
-		String parameter = line.substring(startCol, endCol);
-		String funcName = replacement.substring(1, replacement.length() - 5);
-		l = parameter.length() + token.length() + 2;  // how many characters to delete before the caret
-		replacement = eval(funcName + "(\"" + parameter.replace("\"", "\\\"") + "\")");
-	    } // }}} End if it's a FUNC
-	    for (int i = 0; i < l; i++) textArea.backspace();
-	    textArea.setSelectedText(replacement);
-	    return;
-	}
+        String token = line.substring(caretCol - l, caretCol);
+        String replacement = JPInputComposeExpandInput(token);
+        if (replacement != null) {
+            if (replacement.length() >= 7 && replacement.endsWith("FUNC")) {  // It's a function, boi! {{{
+                char openDelimeter = replacement.charAt(0),
+                    closeDelimeter = replacement.charAt(replacement.length() - 5);  // character right before "FUNC"
+                int col = caretCol - token.length() - 2;  // start right before the closing delimeter
+                int endCol = col + 1;
+                int startCol = -1;  // this is what we're searching for
+                int delimeterCount = 1;
+                while (delimeterCount > 0) {  // we scan backward until the delimeters are balanced
+                    if (col < 0) return;  // the function invocation is malformed
+                    if (line.charAt(col) == openDelimeter)
+                        delimeterCount--;
+                    else if (line.charAt(col) == closeDelimeter)
+                        delimeterCount++;
+                        
+                    if (delimeterCount == 0)
+                        startCol = col + 1;
+                    else if (--col < 0)  // The delimeters did not match up; this is a malformed function call.
+                        return;  // so just do nothing
+                }
+                // If we reached this spot, the delimeters balanced
+                String parameter = line.substring(startCol, endCol);
+                String funcName = replacement.substring(1, replacement.length() - 5);
+                l = parameter.length() + token.length() + 2;  // how many characters to delete before the caret
+                replacement = eval(funcName + "(\"" + parameter.replace("\"", "\\\"") + "\")");
+            } // }}} End if it's a FUNC
+            for (int i = 0; i < l; i++) textArea.backspace();
+            textArea.setSelectedText(replacement);
+            return;
+        }
     }
 }
 
@@ -95,13 +95,13 @@ if (tablePath.exists())
 
 String JPInputComposeConvertHex(String input) {
     if (input.matches("0x\\p{XDigit}+"))
-	return Integer.toString(Integer.parseInt(input.substring(2), 16));
+        return Integer.toString(Integer.parseInt(input.substring(2), 16));
     else if (input.matches("\\d+"))
-	return "0x" + Integer.toHexString(Integer.parseInt(input));
+        return "0x" + Integer.toHexString(Integer.parseInt(input));
     else if (input.matches("\\p{XDigit}+"))
-	return Integer.toString(Integer.parseInt(input, 16));
+        return Integer.toString(Integer.parseInt(input, 16));
     else
-	return "Invalid Number";
+        return "Invalid Number";
 }
 
 String JPInputComposeCharToCodepoint(String input) {
@@ -111,17 +111,17 @@ String JPInputComposeCharToCodepoint(String input) {
 String JPInputComposeCodepointToChar(String input) {
     int codepoint = -1;
     if (input.matches("\\d+"))
-	codepoint = Integer.parseInt(input);
+        codepoint = Integer.parseInt(input);
     else if (input.matches("0x\\p{XDigit}+"))
-	codepoint = Integer.parseInt(input.substring(2), 16);
+        codepoint = Integer.parseInt(input.substring(2), 16);
     else if (input.matches("\\p{XDigit}+"))
-	codepoint = Integer.parseInt(input, 16);
-	
+        codepoint = Integer.parseInt(input, 16);
+        
     if (codepoint > 0x10FFFF) codepoint = -1;
     if (codepoint < 0)
-	return "Invalid codepoint";
+        return "Invalid codepoint";
     else
-	return new String(new int[] {codepoint}, 0, 1);
+        return new String(new int[] {codepoint}, 0, 1);
 }
 
 String JPInputComposeBeanShellEval(String input) {
@@ -129,4 +129,4 @@ String JPInputComposeBeanShellEval(String input) {
 }
 
 
-// :folding=explicit:
+// :folding=explicit:noTabs=true:

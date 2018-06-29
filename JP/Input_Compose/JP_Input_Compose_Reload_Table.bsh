@@ -1,6 +1,6 @@
 if (JPInputComposeHashMap == void) {
-	File scriptFile = new File (new File(scriptPath).getParentFile(), "JP_Input_Compose_Startup.bsh");
-	BeanShell.runScript(view, scriptFile.getPath(), null, false);
+    File scriptFile = new File (new File(scriptPath).getParentFile(), "JP_Input_Compose_Startup.bsh");
+    BeanShell.runScript(view, scriptFile.getPath(), null, false);
 } else {
     JPInputComposeHashMap.clear();
 }
