@@ -23,6 +23,8 @@
 # 
 
 # Accented characters
+AE      Æ
+ae      æ
 A`	À
 a`	à
 A'	Á
