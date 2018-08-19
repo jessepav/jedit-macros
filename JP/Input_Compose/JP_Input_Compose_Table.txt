@@ -23,8 +23,8 @@
 # 
 
 # Accented characters
-AE      Æ
-ae      æ
+AE	Æ
+ae	æ
 A`	À
 a`	à
 A'	Á
@@ -57,6 +57,8 @@ I`	Ì
 i`	ì
 I'	Í
 i'	í
+I:	Ï
+i:	ï
 I-	Ī
 i-	ī
 Iv	Ǐ
@@ -99,6 +101,8 @@ u^	û
 \''	”
 ...	…
 **	•
+\-	–
+\--	—
 
 # Numeral forms
 1/2	½
@@ -118,13 +122,16 @@ _3	₃
 _4	₄
 
 # Currency and miscellaneous symbols
-c|	¢
+c/	¢
 C=	€
 Y=	¥
 deg	°
 div	÷
 mul	×
 inf	∞
+pil	¶
+dg	†
+dg2	‡
 
 # Box drawing
 |-	─
