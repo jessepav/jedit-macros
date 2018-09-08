@@ -162,9 +162,7 @@
         single newline. This method is good if you're going to
         import the resulting text to another program that
         performs its own line-wrapping, such as email,
-        word-processors, etc. If <cols> is given, then lines
-        that are shorter than <cols> will NOT be reformatted,
-        and will be passed through into the output as-is.
+        word-processors, etc.
   
   h<cols>  Hard reflow. This considers a group of lines that are not
            separated by a blank line as a logical paragraph, and
