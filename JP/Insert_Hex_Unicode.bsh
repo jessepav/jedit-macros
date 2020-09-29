@@ -1,0 +1,26 @@
+// Convert a hex unicode value before the caret into the referenced character
+// Hex numbers must be formatted as "+<hex digits>" (with 1 to 6 hex digits).
+// The '+' will be swallowed by the conversion.
+
+
+void convertHexToChar() {
+    int caretPos = textArea.getCaretPosition();
+    int len = Math.min(caretPos, 7);  // <space><six hex digits>
+    String s = textArea.getText(caretPos - len, len);
+    int idx = s.lastIndexOf('+');
+    if (idx == -1)
+    	return;
+    String hex = s.substring(idx + 1);
+    int[] codepoints = new int[1];
+    String val;
+    try {
+	codepoints[0] = Integer.parseInt(hex, 16);
+	val = new String(codepoints, 0, 1);
+    } catch (NumberFormatException ex) {
+    	val = "????";
+    }
+    textArea.setSelection(new Selection.Range(caretPos - len + idx, caretPos));
+    textArea.setSelectedText(val);
+}
+
+convertHexToChar();

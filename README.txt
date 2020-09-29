@@ -36,6 +36,7 @@
      Enumerate Lines
      Evaluate Preceding Expression
      Fill Paragraph
+     Insert Hex Unicode
      Insert Line Below
      Reflow Selection (Quickstart: use Copy as Softflow)
      Repeat Character
