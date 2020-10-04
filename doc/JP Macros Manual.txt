@@ -415,5 +415,9 @@
                     ^
                caret is here 
 
+== Toggle_Wrap_Guide.bsh ==
+
+  Toggles the wrap guide--useful to bind a key to the option.
+
 ----------------------------------------------------------------------
 :noTabs=true:autoIndent=simple:indentSize=2:

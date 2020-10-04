@@ -1,0 +1,7 @@
+void toggleWrapGuide() {
+    boolean wrap = jEdit.getBooleanProperty("view.wrapGuide", false);
+    jEdit.setBooleanProperty("view.wrapGuide", !wrap);
+    jEdit.propertiesChanged();
+}
+toggleWrapGuide();
+
