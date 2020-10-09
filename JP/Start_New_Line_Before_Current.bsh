@@ -1,0 +1,3 @@
+textArea.goToStartOfWhiteSpace(false);
+textArea.insertEnterAndIndent();
+textArea.goToPrevLine(false);
