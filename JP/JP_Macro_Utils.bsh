@@ -70,4 +70,13 @@ public static int parseInt(String s) {
 }
 // }}}
 
+void wrapSelectedText(TextArea textArea, String prefix, String suffix) {
+    String t = textArea.getSelectedText();
+    if (t == null)
+    	t = "";
+    textArea.setSelectedText(prefix + t + suffix);
+    if (t.isEmpty())
+    	textArea.setCaretPosition(textArea.getCaretPosition() - suffix.length());
+}
+
 // :folding=explicit:
