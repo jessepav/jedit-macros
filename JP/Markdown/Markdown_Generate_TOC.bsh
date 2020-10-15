@@ -1,0 +1,71 @@
+/* In Pandoc's manual, we have:
+
+   Extension: gfm_auto_identifiers
+   
+   Changes the algorithm used by auto_identifiers to conform to GitHub’s method.
+   Spaces are converted to dashes (-), uppercase characters to lowercase
+   characters, and punctuation characters other than - and _ are removed. Emojis
+   are replaced by their names.
+*/
+
+import org.apache.commons.lang3.StringUtils;
+
+int indentSize = jEdit.getIntegerProperty("JP.TOC.indentSize", 2);
+int maxLevel = jEdit.getIntegerProperty("JP.TOC.maxLevel", 4);
+
+int getHeadingLevel(String line) {
+    if (line.length() < 3 || line.charAt(0) != '#')
+    	return 0;
+    int spaceIdx = line.indexOf(' ');
+    for (int i = 0; i < spaceIdx; i++) {
+	if (line.charAt(i) != '#')
+	    return 0;
+    }
+    return spaceIdx;
+}
+
+String getHeadingText(String line) {
+    int startIdx = line.indexOf(' ') + 1;
+    return line.substring(startIdx).trim();
+}
+
+String generateAnchor(String headingText) {
+    StringBuilder sb = new StringBuilder(headingText.length());
+    sb.append('#');
+    char[] chars = headingText.toCharArray();
+    for (int i = 0; i < chars.length; i++) {
+    	char c = chars[i]; 
+    	if (c == ' ' || c == '-')
+    	    sb.append('-');
+    	else if (c == '_')
+    	    sb.append('_');
+    	else if (Character.isLetter(c))
+    	    sb.append(Character.toLowerCase(c));
+    	// Otherwise we throw away the character
+    }
+    return sb.toString();
+}
+
+String generateTOC() {
+    StringBuilder sb = new StringBuilder(256);
+    
+    int n = textArea.getLineCount();
+    boolean inCodeBlock = false;
+    for (int i = 0; i < n; i++) {
+    	String line = textArea.getLineText(i);
+    	if (line.trim().startsWith("```"))
+    	    inCodeBlock = !inCodeBlock;
+    	if (inCodeBlock)
+    	    continue;
+    	
+    	int level = getHeadingLevel(line); 
+    	if (level > 0 && level <= maxLevel) {
+    	    String text = getHeadingText(line);
+    	    sb.append(StringUtils.repeat(' ', indentSize * (level-1)));
+    	    sb.append("* [").append(text).append("](").append(generateAnchor(text)).append(")\n");
+    	}
+    }
+    return sb.toString();
+}
+
+textArea.setSelectedText(generateTOC());

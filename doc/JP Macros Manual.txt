@@ -419,5 +419,15 @@
 
   Toggles the wrap guide--useful to bind a key to the option.
 
+== Markdown_Generate_TOC.bsh ==
+
+  Generates a Table of Contents for the currently opened buffer and inserts
+  it at the cursor position, replacing any selection.
+  
+  Two jEdit properties control the macro's behavior:
+  
+    JP.TOC.indentSize - indent size to indicate TOC level (default 2)
+    JP.TOC.maxLevel   - maximum level of header to include (default 4)
+
 ----------------------------------------------------------------------
 :noTabs=true:autoIndent=simple:indentSize=2:
