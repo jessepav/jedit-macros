@@ -1,0 +1,14 @@
+
+void insertTagPair() {
+    String tag = Macros.input(view, "Tag:");
+    if (tag == null)
+    	return;
+    String selText = textArea.getSelectedText();
+    if (selText == null)
+    	selText = "";
+    textArea.setSelectedText("<" + tag + ">" + selText + "</" + tag + ">");
+    if (selText.isEmpty())
+    	textArea.setCaretPosition(textArea.getCaretPosition() - (tag.length() + 3));
+}
+
+insertTagPair();
