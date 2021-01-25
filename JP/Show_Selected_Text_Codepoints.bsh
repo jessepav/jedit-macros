@@ -1,0 +1,14 @@
+import org.apache.commons.lang3.StringUtils;
+
+void showSelectedTextCodepoints() {
+    String text = textArea.getSelectedText();
+    if (text == null)
+        return;
+    int n = text.length();
+    String[] sa = new String[n];
+    for (int i = 0; i < n; i++)
+        sa[i] = String.format("0x%04X", new Object[] {text.codePointAt(i)});
+    Macros.message(view, StringUtils.join(sa, ", "));
+}
+
+showSelectedTextCodepoints();
