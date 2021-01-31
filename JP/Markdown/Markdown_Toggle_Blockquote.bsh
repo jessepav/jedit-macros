@@ -1,0 +1,30 @@
+import org.apache.commons.lang3.StringUtils;
+
+void markdownToggleBlockquote() {
+    int caretLine = textArea.getCaretLine();
+    int lineOffset = textArea.getLineStartOffset(caretLine);
+    int caretCol = textArea.getCaretPosition() - lineOffset;
+    String text = textArea.getSelectedText();
+    if (text == null) {
+        textArea.selectParagraph();
+        text = textArea.getSelectedText();
+    }
+    if (text == null || text.isEmpty()) {
+        textArea.setSelectedText("> ");
+        return;
+    }
+    String[] lines = StringUtils.split(text, "\r\n");
+    boolean addBlock = !lines[0].startsWith("> ");
+    if (addBlock) {
+        for (int i = 0; i < lines.length; i++)
+            lines[i] = "> " + lines[i];
+    } else {
+        for (int i = 0; i < lines.length; i++)
+            if (lines[i].startsWith("> "))
+                lines[i] = lines[i].substring(2);
+    }
+    textArea.setSelectedText(StringUtils.join(lines, '\n'));
+    textArea.setCaretPosition(textArea.getLineStartOffset(caretLine) + caretCol + (addBlock ? 2 : -2));
+}
+
+markdownToggleBlockquote();
