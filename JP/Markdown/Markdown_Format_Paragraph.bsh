@@ -6,4 +6,4 @@ if (true) {
         null,false);
 }
 
-markdownFormatter.formatParagraph(textArea, view);
+markdownFormatter.formatParagraph(view, textArea, buffer);
