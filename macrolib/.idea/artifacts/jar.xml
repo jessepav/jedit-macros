@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="jar">
+    <output-path>$PROJECT_DIR$/build/jar</output-path>
+    <root id="archive" name="jp-macrolib.jar">
+      <element id="module-output" name="macrolib" />
+    </root>
+  </artifact>
+</component>
