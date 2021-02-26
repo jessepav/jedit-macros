@@ -1,0 +1,12 @@
+import org.gjt.sp.jedit.bsh.This;
+
+This defineMarkdownFormatter() {
+    void formatParagraph(TextArea textArea, View view) {
+        Macros.message(view, "Format *this*!");
+    }
+    
+    return this;
+}
+
+This markdownFormatter = defineMarkdownFormatter();
+unset("defineMarkdownFormatter");

@@ -1,0 +1,11 @@
+// if (markdownFormatter == void) {
+if (true) {
+    // Load objects into the global namespace
+    BeanShell.runScript(view,
+        Macros.getMacro("JP/Markdown/Markdown_Define_Objects").getPath(),
+        null,false);
+}
+
+markdownFormatter.formatParagraph(textArea, view);
+
+    
