@@ -2,10 +2,8 @@
 if (true) {
     // Load objects into the global namespace
     BeanShell.runScript(view,
-        Macros.getMacro("JP/Markdown/Markdown_Define_Objects").getPath(),
+        MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
         null,false);
 }
 
 markdownFormatter.formatParagraph(textArea, view);
-
-    

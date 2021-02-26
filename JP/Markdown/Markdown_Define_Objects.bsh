@@ -2,7 +2,7 @@ import org.gjt.sp.jedit.bsh.This;
 
 This defineMarkdownFormatter() {
     void formatParagraph(TextArea textArea, View view) {
-        Macros.message(view, "Format *this*!");
+        Macros.message(view, "Format *that*!");
     }
     
     return this;
