@@ -1,2 +1,0 @@
-jEdit.setIntegerProperty("JP.wrapmargin", 0);
-Macros.getMacro("JP/FillParagraph/Fill_Paragraph").invoke(view);
