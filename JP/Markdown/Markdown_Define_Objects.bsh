@@ -210,10 +210,10 @@ This defineMarkdownFormatter()
         }
         String[] lines = StringUtils.split(text, "\r\n");
         boolean addBlock = !checkForBlockquote(lines[0]);
-        // Let's get minimum indentation
         int tabSize = buffer.getIntegerProperty("tabSize", 8);
         text = text.replace("\t", StringUtils.repeat(' ', tabSize));
         if (addBlock) {
+            // Let's get minimum indentation
             int minIndent = text.length();
             for (String line : lines)
                 minIndent = Math.min(minIndent, getLeadingWhitespace(line).length());
