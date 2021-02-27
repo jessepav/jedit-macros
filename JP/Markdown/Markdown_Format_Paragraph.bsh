@@ -1,5 +1,4 @@
-// if (markdownFormatter == void) {
-if (true) {
+if (markdownFormatter == void) {
     // Load objects into the global namespace
     BeanShell.runScript(view,
         MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
