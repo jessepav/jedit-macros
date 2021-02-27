@@ -1,4 +1,4 @@
-if (markdownFormatter == void) {
+if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
     // Load objects into the global namespace
     BeanShell.runScript(view,
         MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
