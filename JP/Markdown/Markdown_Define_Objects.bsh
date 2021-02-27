@@ -157,7 +157,7 @@ This defineMarkdownFormatter()
 
         trailingNewline = parText.endsWith("\n");
         int tabSize = buffer.getIntegerProperty("tabSize", 8);
-        parText.replace("\t", StringUtils.repeat(' ', tabSize));
+        parText = parText.replace("\t", StringUtils.repeat(' ', tabSize));
 
         StringBuilder sb = new StringBuilder(parText.length() + 100);
 
