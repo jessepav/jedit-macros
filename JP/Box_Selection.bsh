@@ -1,159 +1,163 @@
 // Jesse Pavel (jesse@humidmail.com)
-
-if (textArea.getSelectionCount() == 0 || !(textArea.getSelection(0) instanceof Selection.Rect)) {
-    Macros.error(view, "You need to make a rectangular selection (Ctrl + mouse drag) first.");
-    return;
-}
-
-Selection.Rect rect = (Selection.Rect)textArea.getSelection(0);
-
-String [] singleBoxChars = new String[] {"┌─┐" +
-                                         "│ │" +
-                                         "└─┘", 
-                                         "┌┬┐" +
-                                         "├┼┤" +
-                                         "└┴┘"};
-
-String [] doubleBoxChars = new String[] {"╔═╗" +
-                                         "║ ║" +
-                                         "╚═╝", 
-                                         "╔╦╗" +
-                                         "╠╬╣" +
-                                         "╚╩╝"} ;
-
-String [] roundedBoxChars = new String[] {"╭─╮" +
-                                          "│ │" +
-                                          "╰─╯", 
-                                          "╭┬╮" +
-                                          "├┼┤" +
-                                          "╰┴╯"};
-
-String []   ditaaBoxChars = new String[] {"+-+" +
-                                          "| |" +
-                                          "+-+", 
-                                          "+++" +
-                                          "+++" +
-                                          "+++"};
-
-String [] boxChars = singleBoxChars;
-
-String s = jEdit.getProperty("JP.boxstyle");
-if (s != null) {
-    switch(s) {
-	case "double":
-	    boxChars = doubleBoxChars;
-	    break;
-        case "rounded":
-	    boxChars = roundedBoxChars;
-	    break;
-	case "ditaa":
-	case "ascii":
-	    boxChars = ditaaBoxChars;
-	    break;
-	default:
-	    boxChars = singleBoxChars;
-	    break;
-    }
-}
-
-char    ul = boxChars[0].charAt(0),
-      horz = boxChars[0].charAt(1),
-        ur = boxChars[0].charAt(2),
-      vert = boxChars[0].charAt(3),
-        ll = boxChars[0].charAt(6),
-        lr = boxChars[0].charAt(8),
-   padding = boxChars[0].charAt(4);
-
-// These are the join pieces
-char  jtop = boxChars[1].charAt(1),
-     jleft = boxChars[1].charAt(3),
-    jright = boxChars[1].charAt(5),
-   jbottom = boxChars[1].charAt(7),
-   jcenter = boxChars[1].charAt(4);
-
-// Each character cell is defined by the presence or absence of four component
-// lines, corresponding to the four points of a center piece (plus sign). By
-// doing a bitwise-or of the two box pieces we're combining, we get the resulting
-// piece.
-
-final int TOP    = 0x01;
-final int BOTTOM = 0x02;
-final int LEFT   = 0x04;
-final int RIGHT  = 0x08;
-
-char [] combinations = new char[16];
-combinations[0] = padding;
-combinations[BOTTOM + RIGHT] = ul;
-combinations[LEFT + RIGHT] = horz;
-combinations[LEFT + BOTTOM] = ur;
-combinations[TOP + BOTTOM] = vert;
-combinations[TOP + RIGHT] = ll;
-combinations[TOP + LEFT] = lr;
-combinations[LEFT + RIGHT + BOTTOM] = jtop;
-combinations[TOP + BOTTOM + RIGHT] = jleft;
-combinations[TOP + BOTTOM + LEFT] = jright;
-combinations[LEFT + RIGHT + TOP] = jbottom;
-combinations[LEFT + RIGHT + TOP + BOTTOM] = jcenter;
-
-int getBoxCharBitValue(char boxChar)
-{
-    for (int i = 0; i < combinations.length; i++) {
-	if (combinations[i] == boxChar)
-	    return i;
-    }
-    return 0;
-}
-
-char getBoxJoinChar(char boxChar, char currentChar)
-{
-    char resultChar = boxChar;
-    
-    if (boxChars[0].indexOf(currentChar) != -1 || boxChars[1].indexOf(currentChar) != -1) {
-	resultChar = combinations[getBoxCharBitValue(boxChar) | getBoxCharBitValue(currentChar)];
-    }
-    return resultChar;
-}
-
-int startLine = rect.getStartLine(),
-      endLine = rect.getEndLine(),
-     startCol = rect.getStartColumn(buffer),
-       endCol = rect.getEndColumn(buffer);
-
-int numCols = endCol - startCol;
-
-StringBuilder outputBuffer = new StringBuilder();
-StringBuilder lineBuffer = new StringBuilder(numCols + 20);
-String line;
-
-void setLineBufferCharAt(int offset, char boxChar) {
-    lineBuffer.setCharAt(offset, getBoxJoinChar(boxChar, lineBuffer.charAt(offset)));
-}
-
-for (int n = startLine; n <= endLine; n++) {
-    lineBuffer.delete(0, lineBuffer.length());
-    line = textArea.getLineText(n);
-    if (line.length() > startCol)
-	lineBuffer.append(line.substring(startCol, Math.min(line.length(), endCol)));
-    if (lineBuffer.length() < numCols)
-	lineBuffer.append(StandardUtilities.createWhiteSpace(numCols - lineBuffer.length(), 0));
-	
-    if (n == startLine) {
-	setLineBufferCharAt(0, ul);
-	for (int i = 1; i < numCols - 1; i++)
-	    setLineBufferCharAt(i, horz);
-	setLineBufferCharAt(numCols - 1, ur);
-    } else if (n == endLine) {
-	setLineBufferCharAt(0, ll);
-	for (int i = 1; i < numCols - 1; i++)
-	    setLineBufferCharAt(i, horz);
-	setLineBufferCharAt(numCols - 1, lr);
-    } else {
-	setLineBufferCharAt(0, vert);
-	setLineBufferCharAt(numCols - 1, vert);
-    }
-    outputBuffer.append(lineBuffer).append('\n');
-}
-
-textArea.setSelectedText(outputBuffer.toString());
-
 // :mode=java2:
+    
+void boxSelection() {
+
+    if (textArea.getSelectionCount() == 0 || !(textArea.getSelection(0) instanceof Selection.Rect)) {
+        Macros.error(view, "You need to make a rectangular selection (Ctrl + mouse drag) first.");
+        return;
+    }
+    
+    Selection.Rect rect = (Selection.Rect)textArea.getSelection(0);
+    
+    String [] singleBoxChars = new String[] {"┌─┐" +
+                                             "│ │" +
+                                             "└─┘", 
+                                             "┌┬┐" +
+                                             "├┼┤" +
+                                             "└┴┘"};
+    
+    String [] doubleBoxChars = new String[] {"╔═╗" +
+                                             "║ ║" +
+                                             "╚═╝", 
+                                             "╔╦╗" +
+                                             "╠╬╣" +
+                                             "╚╩╝"} ;
+    
+    String [] roundedBoxChars = new String[] {"╭─╮" +
+                                              "│ │" +
+                                              "╰─╯", 
+                                              "╭┬╮" +
+                                              "├┼┤" +
+                                              "╰┴╯"};
+    
+    String []   ditaaBoxChars = new String[] {"+-+" +
+                                              "| |" +
+                                              "+-+", 
+                                              "+++" +
+                                              "+++" +
+                                              "+++"};
+    
+    String [] boxChars = singleBoxChars;
+    
+    String s = jEdit.getProperty("JP.boxstyle");
+    if (s != null) {
+        switch(s) {
+            case "double":
+                boxChars = doubleBoxChars;
+                break;
+            case "rounded":
+                boxChars = roundedBoxChars;
+                break;
+            case "ditaa":
+            case "ascii":
+                boxChars = ditaaBoxChars;
+                break;
+            default:
+                boxChars = singleBoxChars;
+                break;
+        }
+    }
+    
+    char    ul = boxChars[0].charAt(0),
+          horz = boxChars[0].charAt(1),
+            ur = boxChars[0].charAt(2),
+          vert = boxChars[0].charAt(3),
+            ll = boxChars[0].charAt(6),
+            lr = boxChars[0].charAt(8),
+       padding = boxChars[0].charAt(4);
+    
+    // These are the join pieces
+    char  jtop = boxChars[1].charAt(1),
+         jleft = boxChars[1].charAt(3),
+        jright = boxChars[1].charAt(5),
+       jbottom = boxChars[1].charAt(7),
+       jcenter = boxChars[1].charAt(4);
+    
+    // Each character cell is defined by the presence or absence of four component
+    // lines, corresponding to the four points of a center piece (plus sign). By
+    // doing a bitwise-or of the two box pieces we're combining, we get the resulting
+    // piece.
+    
+    final int TOP    = 0x01;
+    final int BOTTOM = 0x02;
+    final int LEFT   = 0x04;
+    final int RIGHT  = 0x08;
+    
+    char [] combinations = new char[16];
+    combinations[0] = padding;
+    combinations[BOTTOM + RIGHT] = ul;
+    combinations[LEFT + RIGHT] = horz;
+    combinations[LEFT + BOTTOM] = ur;
+    combinations[TOP + BOTTOM] = vert;
+    combinations[TOP + RIGHT] = ll;
+    combinations[TOP + LEFT] = lr;
+    combinations[LEFT + RIGHT + BOTTOM] = jtop;
+    combinations[TOP + BOTTOM + RIGHT] = jleft;
+    combinations[TOP + BOTTOM + LEFT] = jright;
+    combinations[LEFT + RIGHT + TOP] = jbottom;
+    combinations[LEFT + RIGHT + TOP + BOTTOM] = jcenter;
+    
+    int getBoxCharBitValue(char boxChar)
+    {
+        for (int i = 0; i < combinations.length; i++) {
+            if (combinations[i] == boxChar)
+                return i;
+        }
+        return 0;
+    }
+    
+    char getBoxJoinChar(char boxChar, char currentChar)
+    {
+        char resultChar = boxChar;
+        
+        if (boxChars[0].indexOf(currentChar) != -1 || boxChars[1].indexOf(currentChar) != -1) {
+            resultChar = combinations[getBoxCharBitValue(boxChar) | getBoxCharBitValue(currentChar)];
+        }
+        return resultChar;
+    }
+    
+    int startLine = rect.getStartLine(),
+          endLine = rect.getEndLine(),
+         startCol = rect.getStartColumn(buffer),
+           endCol = rect.getEndColumn(buffer);
+    
+    int numCols = endCol - startCol;
+    
+    StringBuilder outputBuffer = new StringBuilder();
+    StringBuilder lineBuffer = new StringBuilder(numCols + 20);
+    String line;
+    
+    void setLineBufferCharAt(int offset, char boxChar) {
+        lineBuffer.setCharAt(offset, getBoxJoinChar(boxChar, lineBuffer.charAt(offset)));
+    }
+    
+    for (int n = startLine; n <= endLine; n++) {
+        lineBuffer.setLength(0);
+        line = textArea.getLineText(n);
+        if (line.length() > startCol)
+            lineBuffer.append(line.substring(startCol, Math.min(line.length(), endCol)));
+        if (lineBuffer.length() < numCols)
+            lineBuffer.append(StandardUtilities.createWhiteSpace(numCols - lineBuffer.length(), 0));
+            
+        if (n == startLine) {
+            setLineBufferCharAt(0, ul);
+            for (int i = 1; i < numCols - 1; i++)
+                setLineBufferCharAt(i, horz);
+            setLineBufferCharAt(numCols - 1, ur);
+        } else if (n == endLine) {
+            setLineBufferCharAt(0, ll);
+            for (int i = 1; i < numCols - 1; i++)
+                setLineBufferCharAt(i, horz);
+            setLineBufferCharAt(numCols - 1, lr);
+        } else {
+            setLineBufferCharAt(0, vert);
+            setLineBufferCharAt(numCols - 1, vert);
+        }
+        outputBuffer.append(lineBuffer).append('\n');
+    }
+    
+    textArea.setSelectedText(outputBuffer.toString());
+}
+
+boxSelection();
