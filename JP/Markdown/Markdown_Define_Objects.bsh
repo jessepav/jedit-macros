@@ -90,7 +90,7 @@ This defineMarkdownFormatter()
         return oa;
     }
 
-    void reflowText(String parText, StringBuilder sb, int wrapMargin) {
+    void reflowText(String parText, StringBuilder sb, int wrapMargin, boolean isBlockquote) {
         String prefix = getListStartText(parText);
         if (prefix == null)
             prefix = getLeadingWhitespace(parText);
@@ -98,6 +98,12 @@ This defineMarkdownFormatter()
         String indentSpace = StringUtils.repeat(' ', indent);
         String text = parText.substring(indent).trim();
         String[] words = StringUtils.split(text);
+        if (isBlockquote) {
+            int pwsi = getLeadingWhitespace(prefix).length();  // prefix white-space indent
+            prefix = StringUtils.repeat(' ', pwsi) + "> " + prefix.substring(pwsi);
+            indentSpace = StringUtils.repeat(' ', pwsi) + "> " + StringUtils.repeat(' ', indent - pwsi);
+            indent += 2;
+        }
         int n = words.length;
         int col = 0;  // column at which we're inserting words
         sb.append(prefix).append(words[0]);
@@ -114,7 +120,19 @@ This defineMarkdownFormatter()
             }
         }
     }
-
+    
+    boolean checkForBlockquote(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (!Character.isWhitespace(c))
+                return c == '>';
+        }
+        return false;
+    }
+    
+    // (?<=(?:^|\n) *)> ?
+    Pattern BLOCKQUOTE_PATTERN = Pattern.compile("(?<=(?:^|\\n) *)> ?");
+    
     /**
      * This is the "main" method of the macro
      */
@@ -143,7 +161,12 @@ This defineMarkdownFormatter()
 
         StringBuilder sb = new StringBuilder(parText.length() + 100);
 
-        reflowText(parText, sb, buffer.getIntegerProperty("maxLineLen", 0));
+        int wrapMargin = buffer.getIntegerProperty("maxLineLen", 72);
+        boolean isBlockquote = checkForBlockquote(parText);
+        if (isBlockquote) {
+            parText = BLOCKQUOTE_PATTERN.matcher(parText).replaceAll("");
+        }
+        reflowText(parText, sb, wrapMargin, isBlockquote);
 
         // Save our reformatted text back to parText
         if (trailingNewline)
