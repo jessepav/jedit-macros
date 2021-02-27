@@ -1,5 +1,7 @@
 import org.apache.commons.lang3.StringUtils;
 
+// Note: this currently doesn't work with indented blockquotes
+
 void markdownToggleBlockquote() {
     int caretLine = textArea.getCaretLine();
     int lineOffset = textArea.getLineStartOffset(caretLine);
