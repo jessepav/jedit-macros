@@ -1,7 +1,9 @@
 import org.gjt.sp.jedit.bsh.This;
+import org.apache.commons.lang3.StringUtils;
 
 This defineMarkdownFormatter() 
 {
+    // " *(?:[\*\+\-:~]|(?:\d+|#)\.) +"
     Pattern LIST_ITEM_PATTERN = Pattern.compile(" *(?:[\\*\\+\\-:~]|(?:\\d+|#)\\.) +");
 
     /**
@@ -90,6 +92,9 @@ This defineMarkdownFormatter()
         return oa;
     }
 
+    /**
+     * Used by formatParagraph() to reflow text.
+     */
     void reflowText(String parText, StringBuilder sb, int wrapMargin, boolean isBlockquote) {
         String prefix = getListStartText(parText);
         if (prefix == null)
@@ -121,6 +126,7 @@ This defineMarkdownFormatter()
         }
     }
     
+    /** Returns true if the first non-whitespace character in {@code text} is a {@code '>'}  */
     boolean checkForBlockquote(String text) {
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
@@ -134,7 +140,8 @@ This defineMarkdownFormatter()
     Pattern BLOCKQUOTE_PATTERN = Pattern.compile("(?<=(?:^|\\n) *)> ?");
     
     /**
-     * This is the "main" method of the macro
+     * Reflow selected text (if a selection is active) or the current paragraph
+     * to fit within the buffer's wrapMargin. 
      */
     void formatParagraph(View view, JEditTextArea textArea, Buffer buffer) {
         int parStartLine = -1, parEndLine = -1;
@@ -186,6 +193,37 @@ This defineMarkdownFormatter()
         }
 
         textArea.setCaretPosition(Math.min(caretPos, buffer.getLength()));
+    }
+    
+    void toggleBlockquote(View view, JEditTextArea textArea, Buffer buffer) {
+        int caretLine = textArea.getCaretLine();
+        int lineOffset = textArea.getLineStartOffset(caretLine);
+        int caretCol = textArea.getCaretPosition() - lineOffset;
+        String text = textArea.getSelectedText();
+        if (text == null) {
+            textArea.selectParagraph();
+            text = textArea.getSelectedText();
+        }
+        if (text == null || text.isEmpty()) {
+            textArea.setSelectedText("> ");
+            return;
+        }
+        String[] lines = StringUtils.split(text, "\r\n");
+        boolean addBlock = !checkForBlockquote(lines[0]);
+        // Let's get minimum indentation
+        int tabSize = buffer.getIntegerProperty("tabSize", 8);
+        text = text.replace("\t", StringUtils.repeat(' ', tabSize));
+        if (addBlock) {
+            int minIndent = text.length();
+            for (String line : lines)
+                minIndent = Math.min(minIndent, getLeadingWhitespace(line).length());
+            for (int i = 0; i < lines.length; i++)
+                lines[i] = lines[i].substring(0, minIndent) + "> " + lines[i].substring(minIndent);
+            textArea.setSelectedText(StringUtils.join(lines, '\n'));
+        } else {
+            textArea.setSelectedText(BLOCKQUOTE_PATTERN.matcher(text).replaceAll(""));
+        }
+        textArea.setCaretPosition(textArea.getLineStartOffset(caretLine) + caretCol + (addBlock ? 2 : -2));
     }
     
     return this;
