@@ -192,7 +192,7 @@ This defineMarkdownFormatter()
             textArea.setSelectedText(parText);
         }
 
-        textArea.setCaretPosition(Math.min(caretPos, buffer.getLength()));
+        textArea.moveCaretPosition(Math.min(caretPos, buffer.getLength()));
     }
     
     void toggleBlockquote(View view, JEditTextArea textArea, Buffer buffer) {
@@ -223,7 +223,7 @@ This defineMarkdownFormatter()
         } else {
             textArea.setSelectedText(BLOCKQUOTE_PATTERN.matcher(text).replaceAll(""));
         }
-        textArea.setCaretPosition(textArea.getLineStartOffset(caretLine) + caretCol + (addBlock ? 2 : -2));
+        textArea.moveCaretPosition(textArea.getLineStartOffset(caretLine) + caretCol + (addBlock ? 2 : -2));
     }
     
     return this;
