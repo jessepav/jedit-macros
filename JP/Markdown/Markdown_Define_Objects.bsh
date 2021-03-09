@@ -3,8 +3,8 @@ import org.apache.commons.lang3.StringUtils;
 
 This defineMarkdownFormatter() 
 {
-    // " *(?:[\*\+\-:~]|(?:\d+|#)\.) +"
-    Pattern LIST_ITEM_PATTERN = Pattern.compile(" *(?:[\\*\\+\\-:~]|(?:\\d+|#)\\.) +");
+    // "(?: *(?:[\*\+\-:~]|(?:\d+|#)\.) +|\[\^\S{2})"
+    Pattern LIST_ITEM_PATTERN = Pattern.compile("(?: *(?:[\\*\\+\\-:~]|(?:\\d+|#)\\.) +|\\[\\^\\S{2})");
 
     /**
      * Tests if a line is the start of some sort of list item, and if so, return the text
