@@ -1,5 +1,7 @@
 import org.gjt.sp.jedit.bsh.This;
 import org.apache.commons.lang3.StringUtils;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 This defineMarkdownFormatter() 
 {
