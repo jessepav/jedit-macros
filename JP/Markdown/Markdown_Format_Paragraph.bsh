@@ -1,8 +1,12 @@
-if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
-    // Load objects into the global namespace
-    BeanShell.runScript(view,
-        MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
-        null,false);
+void markdownFormatParagraph() {
+    if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
+        // Load objects into the global namespace
+        BeanShell.runScript(view,
+            MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
+            null,false);
+    }
+    
+    markdownFormatter.formatParagraph(view, textArea, buffer);
 }
 
-markdownFormatter.formatParagraph(view, textArea, buffer);
+markdownFormatParagraph();
