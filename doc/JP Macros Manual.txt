@@ -51,7 +51,7 @@
   
   The 'flags' can include
   
-    B   Adds a delimter at the beginning of each line
+    B   Adds a delimiter at the beginning of each line
     E   Adds padding and a delimiter at the end of each line
     T   Trims whitespace from the whole line before writing it to
         the buffer. Useful if your delimiter has whitespace,
@@ -83,6 +83,11 @@
   of your select text by lining up the commas, and separating them
   with three spaces.
 
+== Align_Pipe_Table.bsh ==
+
+  A convenience macro for Align_on_Character, that aligns the columns
+  of your select text by pipe characters ('|'), as used by Markdown
+  pipe tables.
 
 == Align_on_Prompted_Character.bsh ==
 
