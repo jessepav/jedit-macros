@@ -1,0 +1,31 @@
+/*
+This macro demonstrates how to temporarily trap (i.e. consume) input that is going
+to the current view, in order to implement "modal" commands, as one might find in
+vi, without performing the convoluted macro-within-a-macro acrobatics that using
+InputHandler#readNextChar() requires. 
+
+When this macro is run, it will read keystrokes until the user presses 'q', at
+which point it will insert in the buffer the characters typed while active, in
+uppercase, bounded by '|' characters.
+*/
+
+InputHandler handler = view.getInputHandler();
+StringBuilder sb = new StringBuilder(16);
+
+KeyListener listener = new KeyListener() {
+    void keyPressed(KeyEvent e) {}
+    void keyReleased(KeyEvent e) {}
+    void keyTyped(KeyEvent e) {
+        char c = e.getKeyChar();
+        if (c == 'q') {
+            sb.append('|');
+            textArea.setSelectedText(sb.toString().toUpperCase());
+            handler.setKeyEventInterceptor(null);
+        } else {
+            sb.append(c);
+        }
+    }
+};
+
+sb.append('|');
+handler.setKeyEventInterceptor(listener);
