@@ -143,9 +143,13 @@ This defineMarkdownFormatter()
     
     /**
      * Reflow selected text (if a selection is active) or the current paragraph
-     * to fit within the buffer's wrapMargin. 
+     * to fit within the wrapMargin.
+     *
+     * If wrapMargin == 0, the margin will be taken from the buffer's maxLineLen property.
+     * If wrapMargin == -1, the margin will be taken from the length of the first line of
+     *                      the text to wrap.
      */
-    void formatParagraph(View view, JEditTextArea textArea, Buffer buffer) {
+    void formatParagraph(View view, JEditTextArea textArea, Buffer buffer, int wrapMargin) {
         int parStartLine = -1, parEndLine = -1;
         String parText;
         boolean usingSelection;
@@ -170,7 +174,13 @@ This defineMarkdownFormatter()
 
         StringBuilder sb = new StringBuilder(parText.length() + 100);
 
-        int wrapMargin = buffer.getIntegerProperty("maxLineLen", 72);
+        if (wrapMargin == 0) {
+            wrapMargin = buffer.getIntegerProperty("maxLineLen", 72);
+        } else if (wrapMargin == -1) {
+            wrapMargin = parText.indexOf("\n");
+            if (wrapMargin == -1)
+                wrapMargin = buffer.getIntegerProperty("maxLineLen", 72);
+        }
         boolean isBlockquote = checkForBlockquote(parText);
         if (isBlockquote) {
             parText = BLOCKQUOTE_PATTERN.matcher(parText).replaceAll("");

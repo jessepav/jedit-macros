@@ -1,4 +1,4 @@
-void markdownFormatParagraph() {
+void markdownFormatParagraphFirstLineLength() {
     if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
         // Load objects into the global namespace
         BeanShell.runScript(view,
@@ -6,7 +6,7 @@ void markdownFormatParagraph() {
             null,false);
     }
     
-    markdownFormatter.formatParagraph(view, textArea, buffer, 0);
+    markdownFormatter.formatParagraph(view, textArea, buffer, -1);
 }
 
-markdownFormatParagraph();
+markdownFormatParagraphFirstLineLength();
