@@ -19,6 +19,15 @@ This defineMarkdownFormatter()
         else
             return null;
     }
+    
+    /**
+     * Returns true if a given line is a paragraph delimeter.
+     */
+    boolean isParagraphDelimiter(String line) {
+        int n = line.length();
+        return n == 0 || (line.charAt(0) == '<' && line.charAt(n-1) == '>') || StringUtils.isWhitespace(line) ||
+               line.startsWith(":::");
+    }
 
     /**
      * Returns the leading whitespace of a string.
@@ -68,7 +77,7 @@ This defineMarkdownFormatter()
             String lineText = textArea.getLineText(parStartLine);
             if (getListStartText(lineText) != null) {
                 break;
-            } else if (StringUtils.isWhitespace(lineText)) {
+            } else if (isParagraphDelimiter(lineText)) {
                 parStartLine++;   // the previously-scanned line is the paragraph start
                 break;
             }
@@ -77,7 +86,7 @@ This defineMarkdownFormatter()
         // Now scan down looking for the paragraph end line
         for (parEndLine = currentLine + 1; parEndLine < numLines; parEndLine++) {
             String lineText = textArea.getLineText(parEndLine);
-            if (getListStartText(lineText) != null || StringUtils.isWhitespace(lineText)) {
+            if (getListStartText(lineText) != null || isParagraphDelimiter(lineText)) {
                 parEndLine--; // the previously-scanned line is the paragraph end
                 break;
             }
