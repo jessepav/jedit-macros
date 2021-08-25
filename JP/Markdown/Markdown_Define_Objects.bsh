@@ -7,6 +7,9 @@ This defineMarkdownFormatter()
 {
     // "(?: *(?:[\*\+\-:~]|(?:\d+|#)\.) +|\[\^\S{2})"
     Pattern LIST_ITEM_PATTERN = Pattern.compile("(?: *(?:[\\*\\+\\-:~]|(?:\\d+|#)\\.) +|\\[\\^\\S{2})");
+    
+    // The fraction by which words are allowed to overflow the margin
+    int OVERFLOW_DIVISOR = jEdit.getIntegerProperty("JP.overflowDivisor", 4);
 
     /**
      * Tests if a line is the start of some sort of list item, and if so, return the text
@@ -176,7 +179,9 @@ This defineMarkdownFormatter()
         for (int i = 1; i < n; i++) {
             String word = words[i];
             int wordlen = word.length();
-            if (col + 1 + wordlen <= wrapMargin) {
+            int remaining = wrapMargin - col + 1;
+            int overflow = wordlen + 1 - remaining;
+            if (overflow < wordlen/OVERFLOW_DIVISOR) {
                 sb.append(' ').append(word);
                 col += 1 + wordlen;
             } else {  // go to a new line
