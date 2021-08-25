@@ -28,9 +28,47 @@ This defineMarkdownFormatter()
         char firstChar = n > 0 ? line.charAt(0) : '\0';
         return n == 0 ||   // empty line 
                ((firstChar == '<' || firstChar == ' ') && line.charAt(n-1) == '>') ||  // HTML tag
-               firstChar == 0xA0 || firstChar == 0x2003 || firstChar == 0x2002 || // formatting indendation
                StringUtils.isWhitespace(line) || // blank line
                line.startsWith(":::");  // Pandoc div
+    }
+    
+    /**
+     * Return true if the given line is the start of a paragraph.
+     */
+    boolean isParagraphStart(String line) {
+        char c = firstNonSpaceChar(line);
+        if (c == 0xA0 || c == 0x2003 || c == 0x2002) { // formatting indendation
+            return true;
+        } else if (c == '&') {
+            line = line.trim();
+            return line.startsWith("&nbsp;") || line.startsWith("&emsp;") || line.startsWith("&ensp;");
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Return true if the given line is the last line of a paragraph.
+     */
+    boolean isParagraphEnd(String line) {
+        return line.endsWith("<br>") || line.endsWith("<br />") || line.endsWith("\\");
+    }
+    
+    /**
+     * Return the first non-space character in a line, or '\0' if the line is empty or has no
+     * non-space characters.
+     */
+    char firstNonSpaceChar(String line) {
+        char c = '\0';
+        int n = line.length();
+        for (int i = 0; i < n; i++) {
+            char c2 = line.charAt(i);
+            if (c2 != ' ') {
+                c = c2;
+                break;
+            }
+        }
+        return c;
     }
 
     /**
@@ -79,7 +117,7 @@ This defineMarkdownFormatter()
         // First we scan up looking for the paragraph start line
         for (parStartLine = currentLine; parStartLine >= 0; parStartLine--) {
             String lineText = textArea.getLineText(parStartLine);
-            if (getListStartText(lineText) != null) {
+            if (getListStartText(lineText) != null || isParagraphStart(lineText)) {
                 break;
             } else if (isParagraphDelimiter(lineText)) {
                 if (parStartLine != currentLine)
@@ -89,10 +127,13 @@ This defineMarkdownFormatter()
         }
         parStartLine = Math.max(parStartLine, 0);
         // Now scan down looking for the paragraph end line
-        for (parEndLine = currentLine + 1; parEndLine < numLines; parEndLine++) {
+        for (parEndLine = currentLine; parEndLine < numLines; parEndLine++) {
             String lineText = textArea.getLineText(parEndLine);
             if (getListStartText(lineText) != null || isParagraphDelimiter(lineText)) {
-                parEndLine--; // the previously-scanned line is the paragraph end
+                if (parEndLine != currentLine)
+                    parEndLine--; // the previously-scanned line is the paragraph end
+                break;
+            } else if (isParagraphEnd(lineText)) {
                 break;
             }
         }
