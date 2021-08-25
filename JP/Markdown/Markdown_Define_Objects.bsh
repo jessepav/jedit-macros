@@ -120,7 +120,7 @@ This defineMarkdownFormatter()
         // First we scan up looking for the paragraph start line
         for (parStartLine = currentLine; parStartLine >= 0; parStartLine--) {
             String lineText = textArea.getLineText(parStartLine);
-            if (isParagraphDelimiter(lineText) || isParagraphEnd(lineText)) {
+            if (isParagraphDelimiter(lineText) || (parStartLine != currentLine && isParagraphEnd(lineText))) {
                 if (parStartLine != currentLine)
                     parStartLine++;   // the previously-scanned line is the paragraph start
                 break;
