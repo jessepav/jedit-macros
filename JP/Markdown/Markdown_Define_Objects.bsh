@@ -117,24 +117,27 @@ This defineMarkdownFormatter()
         // First we scan up looking for the paragraph start line
         for (parStartLine = currentLine; parStartLine >= 0; parStartLine--) {
             String lineText = textArea.getLineText(parStartLine);
-            if (getListStartText(lineText) != null || isParagraphStart(lineText)) {
-                break;
-            } else if (isParagraphDelimiter(lineText)) {
+            if (isParagraphDelimiter(lineText) || isParagraphEnd(lineText)) {
                 if (parStartLine != currentLine)
                     parStartLine++;   // the previously-scanned line is the paragraph start
+                break;
+            } else if (getListStartText(lineText) != null || isParagraphStart(lineText)) {
                 break;
             }
         }
         parStartLine = Math.max(parStartLine, 0);
         // Now scan down looking for the paragraph end line
-        for (parEndLine = currentLine; parEndLine < numLines; parEndLine++) {
-            String lineText = textArea.getLineText(parEndLine);
-            if (getListStartText(lineText) != null || isParagraphDelimiter(lineText)) {
-                if (parEndLine != currentLine)
+        if (isParagraphEnd(textArea.getLineText(currentLine))) {
+            parEndLine = currentLine;
+        } else {
+            for (parEndLine = currentLine + 1; parEndLine < numLines; parEndLine++) {
+                String lineText = textArea.getLineText(parEndLine);
+                if (getListStartText(lineText) != null || isParagraphDelimiter(lineText)) {
                     parEndLine--; // the previously-scanned line is the paragraph end
-                break;
-            } else if (isParagraphEnd(lineText)) {
-                break;
+                    break;
+                } else if (isParagraphEnd(lineText)) {
+                    break;
+                }
             }
         }
         parEndLine = Math.min(parEndLine, numLines - 1);
