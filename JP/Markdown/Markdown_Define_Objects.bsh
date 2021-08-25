@@ -78,7 +78,8 @@ This defineMarkdownFormatter()
             if (getListStartText(lineText) != null) {
                 break;
             } else if (isParagraphDelimiter(lineText)) {
-                parStartLine++;   // the previously-scanned line is the paragraph start
+                if (parStartLine != currentLine)
+                    parStartLine++;   // the previously-scanned line is the paragraph start
                 break;
             }
         }
