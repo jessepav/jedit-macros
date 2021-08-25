@@ -1,3 +1,6 @@
+// You can set the "JP.overflowDivisor" jEdit property to adjust the fraction (in units of the
+// current word's length) by which words are allowed to overflow the margin. By default it is 4.
+
 void markdownFormatParagraph() {
     if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
         // Load objects into the global namespace
