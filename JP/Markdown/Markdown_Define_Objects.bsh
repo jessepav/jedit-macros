@@ -25,10 +25,12 @@ This defineMarkdownFormatter()
      */
     boolean isParagraphDelimiter(String line) {
         int n = line.length();
-        char firstChar = line.charAt(0);
-        return n == 0 || (firstChar == '<' && line.charAt(n-1) == '>') ||
-               firstChar == 0xA0 || firstChar == 0x2003 || firstChar == 0x2002 ||
-               StringUtils.isWhitespace(line) || line.startsWith(":::");
+        char firstChar = n > 0 ? line.charAt(0) : '\0';
+        return n == 0 ||   // empty line 
+               ((firstChar == '<' || firstChar == ' ') && line.charAt(n-1) == '>') ||  // HTML tag
+               firstChar == 0xA0 || firstChar == 0x2003 || firstChar == 0x2002 || // formatting indendation
+               StringUtils.isWhitespace(line) || // blank line
+               line.startsWith(":::");  // Pandoc div
     }
 
     /**
