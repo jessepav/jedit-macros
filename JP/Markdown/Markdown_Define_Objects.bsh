@@ -32,7 +32,7 @@ This defineMarkdownFormatter()
         return n == 0 ||   // empty line 
                ((firstChar == '<' || firstChar == ' ') && line.charAt(n-1) == '>') ||  // HTML tag
                StringUtils.isWhitespace(line) || // blank line
-               line.startsWith(":::");  // Pandoc div
+               (firstNonSpaceChar(line) == ':' && line.trim().startsWith(":::"));  // Pandoc div
     }
     
     /**
