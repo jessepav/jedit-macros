@@ -28,11 +28,12 @@ This defineMarkdownFormatter()
      */
     boolean isParagraphDelimiter(String line) {
         int n = line.length();
-        char firstChar = n > 0 ? line.charAt(0) : '\0';
+        char firstChar = firstNonSpaceChar(line);
         return n == 0 ||   // empty line 
-               ((firstChar == '<' || firstChar == ' ') && line.charAt(n-1) == '>') ||  // HTML tag
+               ((firstChar == '<' || line.charAt(0) == ' ') && line.charAt(n-1) == '>') ||  // HTML tag
                StringUtils.isWhitespace(line) || // blank line
-               (firstNonSpaceChar(line) == ':' && line.trim().startsWith(":::"));  // Pandoc div
+               (firstChar == ':' && line.trim().startsWith(":::")) || // Pandoc div
+               (firstChar == '>' && line.trim().equals(">")); // paragraph break in blockquote  
     }
     
     /**
