@@ -104,9 +104,10 @@ This defineMarkdownFormatter()
 
         int numLines = textArea.getLineCount();
         int currentLine = textArea.getCaretLine();
+        String trimmedLine = textArea.getLineText(currentLine).trim();
 
-        // If the current line is all whitespace, there's nothing to be done
-        if (StringUtils.isWhitespace(textArea.getLineText(currentLine))) {
+        // If the current line is all whitespace or an empty blockquote line, there's nothing to be done
+        if (trimmedLine.isEmpty() || trimmedLine.equals(">")) {
             oa[0] = "";
             oa[1] = oa[2] = currentLine;
             return oa;
