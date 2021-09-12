@@ -8,23 +8,38 @@ When this macro is run, it will read keystrokes until the user presses 'q', at
 which point it will insert in the buffer the characters typed while active, in
 uppercase, bounded by '|' characters.
 
-However, it will pass along keyTyped() events to the normal input handling system
-if the shift key is pressed.
+However, it will pass along events to the normal input handling system if the
+shift or ctrl key is pressed.
 */
 
 InputHandler handler = view.getInputHandler();
 StringBuilder sb = new StringBuilder(16);
 
 KeyListener listener = new KeyListener() {
-    void keyPressed(KeyEvent e) {}
-    void keyReleased(KeyEvent e) {}
-    void keyTyped(KeyEvent e) {
-        if ((e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) == KeyEvent.SHIFT_DOWN_MASK) {
+    boolean passMaskedKey(KeyEvent e) {
+        if ((e.getModifiersEx() & (KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK)) != 0) {
             handler.setKeyEventInterceptor(null);
             handler.processKeyEvent(e, View.ACTION_BAR, false);
             handler.setKeyEventInterceptor(listener);
-            return;
+            return true;
+        } else {
+            return false;
         }
+    }
+    
+    void keyPressed(KeyEvent e) {
+        if (passMaskedKey(e))
+            return;
+    }
+
+    void keyReleased(KeyEvent e) {
+        if (passMaskedKey(e))
+            return;
+    }
+
+    void keyTyped(KeyEvent e) {
+        if (passMaskedKey(e))
+            return;
         char c = e.getKeyChar();
         if (c == 'q') {
             sb.append('|');
