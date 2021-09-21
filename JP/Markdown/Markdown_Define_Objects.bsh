@@ -233,6 +233,8 @@ This defineMarkdownFormatter()
         if (StringUtils.isWhitespace(parText))
             return;
 
+        int initialLength = parText.length();
+        
         trailingNewline = parText.endsWith("\n");
         int tabSize = buffer.getIntegerProperty("tabSize", 8);
         parText = parText.replace("\t", StringUtils.repeat(' ', tabSize));
@@ -257,6 +259,7 @@ This defineMarkdownFormatter()
             sb.append('\n');
         parText = sb.toString();
 
+        int finalLength = parText.length();
         int caretPos = textArea.getCaretPosition();
 
         // Finally, modify the text of the buffer
@@ -269,7 +272,7 @@ This defineMarkdownFormatter()
             textArea.setSelectedText(parText);
         }
 
-        textArea.moveCaretPosition(Math.min(caretPos, buffer.getLength()));
+        textArea.moveCaretPosition(Math.min(caretPos + (finalLength - initialLength), buffer.getLength()));
     }
     
     void toggleBlockquote(View view, JEditTextArea textArea, Buffer buffer) {
