@@ -1,7 +1,8 @@
-int AMOUNT_TO_MOVE = 15;
+void moveLeftMulti() {
+    int delta = jEdit.getIntegerProperty("JP.multiHorizontalDelta", 15);
+    int newPos = Math.max(textArea.getLineStartOffset(textArea.getCaretLine()),
+                          textArea.getCaretPosition() - delta);
+    textArea.moveCaretPosition(newPos, textArea.NORMAL_SCROLL);
+}
 
-int newPos = Math.max(textArea.getLineStartOffset(textArea.getCaretLine()),
-		      textArea.getCaretPosition() - AMOUNT_TO_MOVE);
-
-textArea.moveCaretPosition(newPos, textArea.NORMAL_SCROLL);
-
+moveLeftMulti();
