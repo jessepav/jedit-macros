@@ -1,0 +1,31 @@
+import org.jasypt.util.text.BasicTextEncryptor;
+
+void decryptBuffer() {
+    String pw = Macros.input(view, "Password:");
+    if (pw == null)
+        return;
+    String base64text = buffer.getText();
+    int n = base64text.length();
+    StringBuilder sb = new StringBuilder(n);
+    for (int i = 0; i < n; i++) {
+        char c = base64text.charAt(i);
+        if (!Character.isWhitespace(c))
+            sb.append(c);
+    }
+    base64text = sb.toString();
+    String plainText = null;
+    try {
+        BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+        textEncryptor.setPassword(pw);
+        plainText = textEncryptor.decrypt(base64text);
+    } catch (Exception ex) {
+        Macros.error(view, "Decryption failed! Jasypt doesn't say why.");
+        return;
+    }
+    buffer.setProperty("JP.TextCrypt.password", pw);
+    buffer.remove(0, buffer.getLength());
+    buffer.insert(0, plainText);
+    buffer.setDirty(false);
+}
+
+decryptBuffer();
