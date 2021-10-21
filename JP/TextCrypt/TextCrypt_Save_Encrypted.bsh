@@ -32,7 +32,7 @@ void saveEncrypted() {
     int col = 0;
     for (int i = 0; i < n; i++) {
         sb.append(base64text.charAt(i));
-        if (col++ == 80) {
+        if (++col == 80) {
             sb.append('\n');
             col = 0;
         }

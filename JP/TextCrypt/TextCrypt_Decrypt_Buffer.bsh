@@ -1,6 +1,7 @@
 import org.jasypt.util.text.BasicTextEncryptor;
 
 void decryptBuffer() {
+    buffer.unsetProperty("JP.TextCrypt.password");  // just in case one was saved
     String pw = Macros.input(view, "Password:");
     if (pw == null || pw.isEmpty())
         return;
