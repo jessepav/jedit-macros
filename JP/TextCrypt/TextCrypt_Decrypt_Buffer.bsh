@@ -2,9 +2,10 @@ import org.jasypt.util.text.BasicTextEncryptor;
 
 void decryptBuffer() {
     String pw = Macros.input(view, "Password:");
-    if (pw == null)
+    if (pw == null || pw.isEmpty())
         return;
     String base64text = buffer.getText();
+    // Remove all whitespace (including newlines)
     int n = base64text.length();
     StringBuilder sb = new StringBuilder(n);
     for (int i = 0; i < n; i++) {
@@ -13,6 +14,7 @@ void decryptBuffer() {
             sb.append(c);
     }
     base64text = sb.toString();
+    // Decrypt
     String plainText = null;
     try {
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
@@ -22,7 +24,9 @@ void decryptBuffer() {
         Macros.error(view, "Decryption failed! Jasypt doesn't say why.");
         return;
     }
+    // Save password in buffer-local property
     buffer.setProperty("JP.TextCrypt.password", pw);
+    // Replace buffer contents with decrypted text
     buffer.remove(0, buffer.getLength());
     buffer.insert(0, plainText);
     buffer.setDirty(false);

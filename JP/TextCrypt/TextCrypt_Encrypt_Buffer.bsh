@@ -1,8 +1,9 @@
 import org.jasypt.util.text.BasicTextEncryptor;
 
 void encryptBuffer() {
+    buffer.unsetProperty("JP.TextCrypt.password");  // just in case one was saved
     String pw = Macros.input(view, "Password:");
-    if (pw == null)
+    if (pw == null || pw.isEmpty())
         return;
     String plainText = buffer.getText();
     String base64text = null;
@@ -14,6 +15,7 @@ void encryptBuffer() {
         Macros.error(view, "Encryption failed! Jasypt doesn't say why.");
         return;
     }
+    // Wrap the base64text into 80-character lines
     int n = base64text.length();
     StringBuilder sb = new StringBuilder(n * 5/4);
     int col = 0;
@@ -25,6 +27,7 @@ void encryptBuffer() {
         }
     }
     base64text = sb.toString();
+    // Replace plain text with encrypted text
     buffer.remove(0, buffer.getLength());
     buffer.insert(0, base64text);
     buffer.setDirty(false);

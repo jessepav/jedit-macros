@@ -2,18 +2,19 @@ import org.jasypt.util.text.BasicTextEncryptor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.charset.StandardCharsets;
 
 void saveEncrypted() {
-    String pw = buffer.getStringProperty("JP.TextCrypt.password");
-    if (pw == null) {
-        Macros.error(view, "You will need to decrypt an encrypted buffer before saving.");
-        return;
-    }
     if (buffer.isUntitled()) {
         Macros.error(view, "You will need to save the untitled buffer to a real path first.");
         return;
+    }
+    String pw = buffer.getStringProperty("JP.TextCrypt.password");
+    if (pw == null) {
+        pw = Macros.input(view, "Password:");
+        if (pw == null || pw.isEmpty())
+            return;
+        buffer.setProperty("JP.TextCrypt.password", pw);
     }
     String plainText = buffer.getText();
     String base64text = null;
@@ -25,6 +26,7 @@ void saveEncrypted() {
         Macros.error(view, "Encryption failed! Jasypt doesn't say why.");
         return;
     }
+    // Wrap the base64text into 80-character lines
     int n = base64text.length();
     StringBuilder sb = new StringBuilder(n * 5/4);
     int col = 0;
@@ -36,11 +38,13 @@ void saveEncrypted() {
         }
     }
     base64text = sb.toString();
-    Files.write(Paths.get(buffer.getPath(), new String[0]),
-                base64text.getBytes(StandardCharsets.US_ASCII),
-                new OpenOption[0]);
+    // Write it to disk
+    Path path = Paths.get(buffer.getPath(), new String[0]);
+    Files.write(path, base64text.getBytes(StandardCharsets.US_ASCII), new java.nio.file.OpenOption[0]);
     buffer.setDirty(false);
-    buffer.setLastModified(System.currentTimeMillis());
+    // So that jEdit doesn't prompt to reload on view focus
+    buffer.setLastModified(Files.getLastModifiedTime(path, new java.nio.file.LinkOption[0]).toMillis());
+    view.getStatus().setMessage("Encrypted buffer saved");
 }
 
 saveEncrypted();
