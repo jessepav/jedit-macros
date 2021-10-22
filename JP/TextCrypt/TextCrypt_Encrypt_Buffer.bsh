@@ -5,7 +5,8 @@ void encryptBuffer() {
     String pw = Macros.input(view, "Password:");
     if (pw == null || pw.isEmpty())
         return;
-    String plainText = buffer.getText();
+    boolean useSelection = textArea.getSelectionCount() == 1;
+    String plainText = useSelection ? textArea.getSelectedText() : buffer.getText();
     String base64text = null;
     try {
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
@@ -28,8 +29,12 @@ void encryptBuffer() {
     }
     base64text = sb.toString();
     // Replace plain text with encrypted text
-    buffer.remove(0, buffer.getLength());
-    buffer.insert(0, base64text);
+    if (useSelection) {
+        textArea.setSelectedText(base64text);
+    } else {
+        buffer.remove(0, buffer.getLength());
+        buffer.insert(0, base64text);
+    }
 }
 
 encryptBuffer();

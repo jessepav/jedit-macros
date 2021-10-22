@@ -5,7 +5,8 @@ void decryptBuffer() {
     String pw = Macros.input(view, "Password:");
     if (pw == null || pw.isEmpty())
         return;
-    String base64text = buffer.getText();
+    boolean useSelection = textArea.getSelectionCount() == 1;
+    String base64text = useSelection ? textArea.getSelectedText() : buffer.getText();
     // Remove all whitespace (including newlines)
     int n = base64text.length();
     StringBuilder sb = new StringBuilder(n);
@@ -28,9 +29,13 @@ void decryptBuffer() {
     // Save password in buffer-local property
     buffer.setProperty("JP.TextCrypt.password", pw);
     // Replace buffer contents with decrypted text
-    buffer.remove(0, buffer.getLength());
-    buffer.insert(0, plainText);
-    buffer.setDirty(false);
+    if (useSelection) {
+        textArea.setSelectedText(plainText);
+    } else {
+        buffer.remove(0, buffer.getLength());
+        buffer.insert(0, plainText);
+        buffer.setDirty(false);
+    }
 }
 
 decryptBuffer();
