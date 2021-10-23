@@ -1,10 +1,13 @@
 import org.jasypt.util.text.BasicTextEncryptor;
 
 void encryptBuffer() {
-    buffer.unsetProperty("JP.TextCrypt.password");  // just in case one was saved
-    String pw = Macros.input(view, "Password:");
-    if (pw == null || pw.isEmpty())
-        return;
+    String pw = buffer.getStringProperty("JP.TextCrypt.password");
+    if (pw == null) {
+        pw = Macros.input(view, "Password:");
+        if (pw == null || pw.isEmpty())
+            return;
+        buffer.setProperty("JP.TextCrypt.password", pw);
+    }
     boolean useSelection = textArea.getSelectionCount() == 1;
     String plainText = useSelection ? textArea.getSelectedText() : buffer.getText();
     String base64text = null;
