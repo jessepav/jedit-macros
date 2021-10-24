@@ -210,7 +210,8 @@ This defineMarkdownFormatter()
      * Reflow selected text (if a selection is active) or the current paragraph
      * to fit within the wrapMargin.
      *
-     * If wrapMargin == 0, the margin will be taken from the buffer's maxLineLen property.
+     * If wrapMargin == 0, the margin will be taken from the JP.wrapLen buffer property, or, if 
+                           that property is not defined, the buffer's maxLineLen property.
      * If wrapMargin == -1, the margin will be taken from the length of the first line of
      *                      the text to wrap.
      */
@@ -242,11 +243,11 @@ This defineMarkdownFormatter()
         StringBuilder sb = new StringBuilder(parText.length() + 100);
 
         if (wrapMargin == 0) {
-            wrapMargin = buffer.getIntegerProperty("maxLineLen", 72);
+            wrapMargin = buffer.getIntegerProperty("JP.wrapLen", buffer.getIntegerProperty("maxLineLen", 72));
         } else if (wrapMargin == -1) {
             wrapMargin = parText.indexOf("\n");
             if (wrapMargin == -1)
-                wrapMargin = buffer.getIntegerProperty("maxLineLen", 72);
+                wrapMargin = buffer.getIntegerProperty("JP.wrapLen", buffer.getIntegerProperty("maxLineLen", 72));
         }
         boolean isBlockquote = checkForBlockquote(parText);
         if (isBlockquote) {
