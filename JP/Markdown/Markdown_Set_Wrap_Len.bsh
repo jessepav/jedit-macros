@@ -1,0 +1,21 @@
+void setWrapLen() {
+    boolean valid = false;
+    while (!valid) {
+        String r = Macros.input(view, "JP.wrapLen", Integer.toString(buffer.getIntegerProperty("JP.wrapLen", 72)));
+        if (r == null)
+            return;
+        try {
+            int wrapLen = Integer.parseInt(r);
+            if (wrapLen > 0) {
+                buffer.setIntegerProperty("JP.wrapLen", wrapLen);
+                valid = true;
+            }
+        } catch (NumberFormatException ex) {
+            // empty
+        }
+        if (!valid)
+            Macros.error(view, "Invalid value");
+    }
+}
+
+setWrapLen();
