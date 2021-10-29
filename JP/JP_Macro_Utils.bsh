@@ -92,3 +92,10 @@ String getPropertyPath(View view, String propName, boolean isDir) {
     }
     return path;
 }
+
+/*
+ * Define a global map that can be used to communicate among scripts.
+ * See Open_Composition_File.bsh for an example of its usage.
+ */
+if (this.jpMap == void)
+    this.jpMap = new HashMap();

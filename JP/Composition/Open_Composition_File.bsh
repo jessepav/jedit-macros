@@ -5,16 +5,16 @@ void openCompositionFile() {
     if (baseDir == null)
         return;
     
-    String keyHit = jEdit.getProperty("JP.compositionKeyHit");
+    String keyHit = jpMap.get("compositionKeyHit");
     if (keyHit == null || keyHit.isEmpty()) {
         StringBuilder sb = new StringBuilder(256);
         sb.append("String scriptPath = \"").append(StringEscapeUtils.escapeJava(scriptPath)).append("\";\n");
-        sb.append("jEdit.setTemporaryProperty(\"JP.compositionKeyHit\", Character.toString(__char__));\n");
+        sb.append("jpMap.put(\"compositionKeyHit\", Character.toString(__char__));\n");
         sb.append("BeanShell.runScript(view, scriptPath, null, false);\n");
         view.getInputHandler().readNextChar("Press file shortcut", sb.toString());
         return;
     } else {
-        jEdit.unsetProperty("JP.compositionKeyHit");
+        jpMap.remove("compositionKeyHit");
     }
     
     String shortcutFile = baseDir + "/tooling/file-shortcuts.properties";
