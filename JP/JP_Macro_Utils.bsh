@@ -1,6 +1,6 @@
 // Put this script in the "startup" directory of your jEdit settings directory.
 // To reload while editing:
-// 	BeanShell.runScript(view,buffer.getPath(),null,false);
+//     BeanShell.runScript(view,buffer.getPath(),null,false);
 
 import java.awt.datatransfer.DataFlavor;
 
@@ -68,4 +68,27 @@ void wrapSelectedText(TextArea textArea, String prefix, String suffix) {
     textArea.setSelectedText(prefix + t + suffix);
     if (t.isEmpty())
     	textArea.setCaretPosition(textArea.getCaretPosition() - suffix.length());
+}
+
+/**
+ * Ensure that a jEdit property is set to the path of a directory or file, prompting
+ * the user if required.
+ * @param view View instance, as predefined in macros
+ * @param propName the name of the jEdit property
+ * @param isDir true if the property should be a directory
+ * @return value of property, or {@code null} if user cancelled VFS browser
+ */
+String getPropertyPath(View view, String propName, boolean isDir) {
+    String path = jEdit.getProperty(propName);
+    if (path == null || path.isEmpty()) {
+        String[] paths = GUIUtilities.showVFSFileDialog(view, null,
+                            isDir ? VFSBrowser.CHOOSE_DIRECTORY_DIALOG : VFSBrowser.OPEN_DIALOG, false);
+        if (paths == null || paths.length == 0) {
+            return null;
+        } else {
+            path = paths[0];
+            jEdit.setProperty(propName, path);
+        }
+    }
+    return path;
 }

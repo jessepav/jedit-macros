@@ -1,12 +1,5 @@
-String backupDir = jEdit.getProperty("jp-backup-dir");
-if (backupDir == null || backupDir.length() == 0) {
-    String [] directory = GUIUtilities.showVFSFileDialog(view, null, VFSBrowser.CHOOSE_DIRECTORY_DIALOG, false);
-    if (directory == null || directory.length == 0)
-	return;
-    else {
-	backupDir = directory[0];
-	jEdit.setProperty("jp-backup-dir", backupDir);
-    }
-}
+String backupDir = getPropertyPath(view, "jp-backup-dir", true);
+if (backupDir == null)
+    return;
 
 buffer.save(view, backupDir + System.getProperty("file.separator") + buffer.getName(), false);
