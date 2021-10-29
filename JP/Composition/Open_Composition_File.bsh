@@ -1,0 +1,33 @@
+import org.apache.commons.lang3.StringEscapeUtils;
+
+void openCompositionFile() {
+    String baseDir = getPropertyPath(view, "JP.compositionDir", true);
+    if (baseDir == null)
+        return;
+    
+    String keyHit = jEdit.getProperty("JP.compositionKeyHit");
+    if (keyHit == null || keyHit.isEmpty()) {
+        StringBuilder sb = new StringBuilder(256);
+        sb.append("String scriptPath = \"").append(StringEscapeUtils.escapeJava(scriptPath)).append("\";\n");
+        sb.append("jEdit.setTemporaryProperty(\"JP.compositionKeyHit\", Character.toString(__char__));\n");
+        sb.append("BeanShell.runScript(view, scriptPath, null, false);\n");
+        view.getInputHandler().readNextChar("Press file shortcut", sb.toString());
+        return;
+    } else {
+        jEdit.unsetProperty("JP.compositionKeyHit");
+    }
+    
+    String shortcutFile = baseDir + "/tooling/file-shortcuts.properties";
+    Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(shortcutFile), "UTF-8"));
+    Properties shortcutProps = new Properties();
+    shortcutProps.load(reader);
+    reader.close();
+    String path = shortcutProps.getProperty(keyHit);
+    if (path == null) {
+        Macros.error(view, "No file path defined for key \"" + keyHit + "\" in\n\n  " + shortcutFile);
+        return;
+    }
+    jEdit.openFile(view, baseDir + path);
+}
+
+openCompositionFile();
