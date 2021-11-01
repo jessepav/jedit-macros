@@ -5,16 +5,10 @@ void openCompositionFile() {
     if (baseDir == null)
         return;
     
-    String keyHit = jpMap.get("compositionKeyHit");
-    if (keyHit == null || keyHit.isEmpty()) {
-        StringBuilder sb = new StringBuilder(256);
-        sb.append("String scriptPath = \"").append(StringEscapeUtils.escapeJava(scriptPath)).append("\";\n");
-        sb.append("jpMap.put(\"compositionKeyHit\", Character.toString(__char__));\n");
-        sb.append("BeanShell.runScript(view, scriptPath, null, false);\n");
-        view.getInputHandler().readNextChar("Press file shortcut", sb.toString());
+    Character keyChar = jpMap.remove("compositionKeyHit");
+    if (keyChar == null) {
+        runScriptWithKeyPress(view, scriptPath, "Press file shortcut", "compositionKeyHit");
         return;
-    } else {
-        jpMap.remove("compositionKeyHit");
     }
     
     String shortcutFile = baseDir + "/tooling/file-shortcuts.properties";
@@ -22,9 +16,18 @@ void openCompositionFile() {
     Properties shortcutProps = new Properties();
     shortcutProps.load(reader);
     reader.close();
-    String path = shortcutProps.getProperty(keyHit);
+    String path = shortcutProps.getProperty(keyChar.toString());
     if (path == null) {
-        Macros.error(view, "No file path defined for key \"" + keyHit + "\" in\n\n  " + shortcutFile);
+        String keyStr;
+        switch (keyChar.charValue()) {
+        case ' ': keyStr = "<space>"; break;
+        case '\t': keyStr = "<tab>"; break;
+        case '\n': keyStr = "<enter>"; break;
+        default:
+            keyStr = "'" + keyChar + "'";
+            break;
+        }
+        Macros.error(view, "No file path defined for " + keyStr + " in\n\n  " + shortcutFile);
         return;
     }
     jEdit.openFile(view, baseDir + path);

@@ -99,3 +99,26 @@ String getPropertyPath(View view, String propName, boolean isDir) {
  */
 if (this.jpMap == void)
     this.jpMap = new HashMap();
+
+
+/**
+ * Prompt the user for a key press, save the resulting character into {@code jpMap}, and run
+ * a script at a given path. If the user presses escape when prompted, the script will not be run.
+ * <p/>
+ * If a script is going to call itself recursively, it should first check for a value for the
+ * given key in {@code jpMap}, and if the value is missing, call this method to prompt the user.
+ * <p/>
+ * Remember to {@code remove()} the value from the map after it's used.
+ * @param view View instance, as predefined in macros
+ * @param scriptPath path to the script, as in the {@code scriptPath} predefined variable
+ * @param prompt prompt to show user when waiting for key press
+ * @param mapKey the key in {@code jpMap} in which to save the {@code Character} that was pressed.
+ */
+void runScriptWithKeyPress(View view, String scriptPath, String prompt, String mapKey) {
+    StringBuilder sb = new StringBuilder(256);
+    sb.append("String scriptPath = \"").append(StringEscapeUtils.escapeJava(scriptPath)).append("\";\n");
+    sb.append("jpMap.put(\"").append(mapKey).append("\", Character.valueOf(__char__));\n");
+    sb.append("BeanShell.runScript(view, scriptPath, null, false);\n");
+    view.getInputHandler().readNextChar(prompt, sb.toString());
+}
+
