@@ -1,6 +1,10 @@
-// Put this script in the "startup" directory of your jEdit settings directory.
-// To reload while editing:
-//     BeanShell.runScript(view,buffer.getPath(),null,false);
+/*
+Put this script in the "startup" directory of your jEdit settings directory.
+To reload while editing:
+
+    BeanShell.runScript(view,buffer.getPath(),null,false);
+
+*/
 
 import java.awt.datatransfer.DataFlavor;
 
