@@ -223,19 +223,37 @@ This defineMarkdownFormatter()
 
         String selectedText = textArea.getSelectedText();
         usingSelection = selectedText != null;
+        
+        int startOffset, endOffset, nonWhitespaceCount, extraSpaceCount; // used for caret positioning
+
         if (usingSelection) {
             parText = selectedText;
+            startOffset = endOffset = nonWhitespaceCount = extraSpaceCount = -1;
         } else {
             Object[] parInfo = getParagraphText(textArea);
             parText = (String) parInfo[0];
             parStartLine = (Integer) parInfo[1];
             parEndLine = (Integer) parInfo[2];
+            startOffset = textArea.getLineStartOffset(parStartLine);
+            endOffset = textArea.getLineEndOffset(parEndLine) - 1;  // see comment in getParagraphText()
+
+            // We are going to count the number of non-whitespace characters between the start of the
+            // paragraph and the caret, to be used later in repositioning the caret.
+            int caretPos = textArea.getCaretPosition();
+            int caretOffset = caretPos - startOffset;
+            nonWhitespaceCount = 0;
+            for (int i = 0; i < caretOffset; i++) {
+                if (!Character.isWhitespace(parText.charAt(i)))
+                    nonWhitespaceCount++;
+            }
+            // If the caret is in the middle of the paragraph and is immediately after a space,
+            // place it after the space in the wrapped paragraph too.
+            extraSpaceCount = (caretPos != startOffset && caretPos != endOffset &&
+                               parText.charAt(caretOffset-1) == ' ') ? 1 : 0;
         }
         if (StringUtils.isWhitespace(parText))
             return;
 
-        int initialLength = parText.length();
-        
         trailingNewline = parText.endsWith("\n");
         int tabSize = buffer.getIntegerProperty("tabSize", 8);
         parText = parText.replace("\t", StringUtils.repeat(' ', tabSize));
@@ -260,20 +278,21 @@ This defineMarkdownFormatter()
             sb.append('\n');
         parText = sb.toString();
 
-        int finalLength = parText.length();
-        int caretPos = textArea.getCaretPosition();
-
         // Finally, modify the text of the buffer
         if (usingSelection) {
             textArea.setSelectedText(parText);
         } else {
-            int startOffset = textArea.getLineStartOffset(parStartLine);
-            int endOffset = textArea.getLineEndOffset(parEndLine) - 1;  // see comment in getParagraphText()
             textArea.setSelection(new Selection.Range(startOffset, endOffset));
             textArea.setSelectedText(parText);
+            
+            // Reposition the caret based on the earlier tally of non-whitespace characters.
+            int i = 0;
+            while (nonWhitespaceCount > 0) {
+                if (!Character.isWhitespace(parText.charAt(i++)))
+                    nonWhitespaceCount--;
+            }
+            textArea.moveCaretPosition(startOffset + Math.min(i + extraSpaceCount, parText.length()));
         }
-
-        textArea.moveCaretPosition(Math.min(caretPos + (finalLength - initialLength), buffer.getLength()));
     }
     
     void toggleBlockquote(View view, JEditTextArea textArea, Buffer buffer) {
