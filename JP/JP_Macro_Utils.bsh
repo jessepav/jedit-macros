@@ -8,6 +8,8 @@ To reload while editing:
 
 import java.awt.datatransfer.DataFlavor;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 String getRegisterText(char reg) {
     Registers.Register r = Registers.getRegister(reg);
     if (r == null) {
