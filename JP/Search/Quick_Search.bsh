@@ -1,0 +1,32 @@
+
+void quickSearch() {
+    String term = Macros.input(view, "Search term:");
+    if (term == null || term.isEmpty())
+        return;
+
+    boolean autoWrapAround = SearchAndReplace.getAutoWrapAround();
+    boolean reverseSearch = SearchAndReplace.getReverseSearch();
+    boolean wholeWord = SearchAndReplace.getWholeWord();
+    boolean ignoreCase = SearchAndReplace.getIgnoreCase();
+    boolean regexp = SearchAndReplace.getRegexp();
+    org.gjt.sp.jedit.search.SearchFileSet fileSet = SearchAndReplace.getSearchFileSet();
+
+    SearchAndReplace.setAutoWrapAround(false);
+    SearchAndReplace.setReverseSearch(jpMap.remove("quickSearchReverse"));
+    SearchAndReplace.setWholeWord(false);
+    SearchAndReplace.setIgnoreCase(true);
+    SearchAndReplace.setRegexp(false);
+    SearchAndReplace.setSearchFileSet(new CurrentBufferSet());
+    
+    SearchAndReplace.setSearchString(term);
+    SearchAndReplace.find(view);
+
+    SearchAndReplace.setAutoWrapAround(autoWrapAround);
+    SearchAndReplace.setReverseSearch(reverseSearch);
+    SearchAndReplace.setWholeWord(wholeWord);
+    SearchAndReplace.setIgnoreCase(ignoreCase);
+    SearchAndReplace.setRegexp(regexp);
+    SearchAndReplace.setSearchFileSet(fileSet);
+}
+
+quickSearch();

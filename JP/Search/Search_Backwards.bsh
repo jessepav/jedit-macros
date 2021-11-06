@@ -1,0 +1,2 @@
+jpMap.put("quickSearchReverse", Boolean.TRUE);
+BeanShell.runScript(view, MiscUtilities.getParentOfPath(scriptPath) + "Quick_Search.bsh", null, true);
