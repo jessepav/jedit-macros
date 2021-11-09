@@ -1,6 +1,9 @@
 
 void quickSearch() {
-    String term = Macros.input(view, "Search term:");
+    String sel = textArea.getSelectedText();
+    if (sel == null)
+        sel = "";
+    String term = Macros.input(view, "Search term:", sel);
     if (term == null || term.isEmpty())
         return;
 
