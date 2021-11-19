@@ -1,0 +1,109 @@
+package com.illcode.jedit;
+
+import com.jgoodies.forms.factories.CC;
+import com.jgoodies.forms.layout.FormLayout;
+import org.gjt.sp.jedit.Buffer;
+import org.gjt.sp.jedit.EditPane;
+import org.gjt.sp.jedit.View;
+import org.gjt.sp.jedit.gui.DockableWindowManager;
+import org.gjt.sp.jedit.textarea.JEditTextArea;
+
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import java.awt.Container;
+import java.awt.Font;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+void switchBuffer() {
+    JDialog dialog;
+    JFrame owner;
+    JLabel label;
+    JTextArea bufferTextArea;
+    
+    Buffer[] buffers;
+
+    void initComponents(JFrame owner) {
+        super.owner = owner;
+
+        dialog = new JDialog(owner, true);
+        label = new JLabel();
+        bufferTextArea = new JTextArea();
+
+        //======== dialog ========
+        dialog.setTitle("Switch Buffer");
+        Container contentPane = dialog.getContentPane();
+        contentPane.setLayout(new FormLayout(
+            "$rgap, 131dlu, $rgap",
+            "$rgap, default, $lgap, fill:default:grow, $rgap"));
+
+        //---- label ----
+        label.setText("---- Choose Buffer ----");
+        label.setFocusable(false);
+        label.setFont(new Font("Monospaced", Font.BOLD, 14));
+        contentPane.add(label, CC.xy(2, 2));
+
+        //---- textArea ----
+        bufferTextArea.setEditable(false);
+        bufferTextArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        bufferTextArea.setOpaque(false);
+        contentPane.add(bufferTextArea, CC.xy(2, 4));
+    }
+
+    void show() {
+        StringBuilder sb = new StringBuilder(256);
+        BufferSet bufferSet = editPane.getBufferSet();
+        buffers = bufferSet.getAllBuffers();
+        int n = buffers.length;
+        for (int i = 0; i < n; i++) {
+            if (i != 0)
+                sb.append('\n');
+            sb.append((char)(i < 9 ? '1' + i : 'A' + i-9)).append(". ");
+            sb.append(buffers[i].getName());
+        }
+        bufferTextArea.setText(sb.toString());
+        sb = null;
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(owner);
+        bufferTextArea.addKeyListener(super);
+        bufferTextArea.requestFocusInWindow();
+        dialog.setVisible(true);  // blocks until hidden
+        bufferTextArea.removeKeyListener(super);
+        buffers = null;
+    }
+
+    public void keyTyped(KeyEvent e) {
+        char c = e.getKeyChar();
+        c = Character.toUpperCase(c);
+        int bufnum = -1;
+        if (c >= '1' && c <= '9')
+            bufnum = c - '1';
+        else if (c >= 'A' && c <= 'Z')
+            bufnum = c - 'A' + 9;
+        if (bufnum != -1 && bufnum < buffers.length)
+            editPane.setBuffer(buffers[bufnum]);
+        dialog.setVisible(false);
+    }
+
+    public void keyPressed(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {}
+    
+    // ---- Entry point ----
+    
+    Object[] components = jpMap.get("switchBufferComponents");
+    if (components == null) {
+        initComponents(view);
+        jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea });
+    } else {
+        dialog = components[0];
+        owner = components[1];
+        label = components[2];
+        bufferTextArea = components[3];
+    }
+    show();
+}
+
+switchBuffer();
