@@ -97,8 +97,7 @@ void switchBuffer() {
     // ---- Entry point ----
     
     Object[] components = jpMap.get("switchBufferComponents");
-    // Object[] components = null;
-    if (components == null) {
+    if (components == null || jEdit.getBooleanProperty("JP.debug")) {
         initComponents(view);
         jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, view });
     } else {
