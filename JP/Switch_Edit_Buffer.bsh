@@ -2,13 +2,20 @@
 void switchEditBuffer() {
     Character keyChar = jpMap.remove("switchBufferKeyHit");
     if (keyChar == null) {
-        runScriptWithKeyPress(view, scriptPath, "Switch to buffer #:", "switchBufferKeyHit");
+        runScriptWithKeyPress(view, scriptPath, "Switch to buffer:", "switchBufferKeyHit");
         return;
     }
-    int i = keyChar.charValue() - '1';
+    char c = Character.toUpperCase(keyChar.charValue());
     BufferSet bs = editPane.getBufferSet();
-    if (i >= 0 && i < bs.size())
-        editPane.setBuffer(bs.getBuffer(i));
+    int bufnum = -1;
+    if (c >= '1' && c <= '9')
+        bufnum = c - '1';
+    else if (c >= 'A' && c <= 'Z')
+        bufnum = c - 'A' + 9;
+    if (bufnum != -1 && bufnum < bs.size())
+        editPane.setBuffer(bs.getBuffer(bufnum));
+    else
+        view.getStatus().setMessage("Switch buffer cancelled");
 }
 
 switchEditBuffer();
