@@ -1,0 +1,33 @@
+JFDML JFormDesigner: "5.2.5.0.333" Java: "1.7.0_261" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
+			"$columnSpecs": "relgap, 131dlu, relgap"
+			"$rowSpecs": "relgap, default, linegap, fill:default:grow, relgap"
+		} ) {
+			name: "this"
+			"title": "Switch Buffer"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label"
+				"text": "Choose Buffer:"
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 2
+				"gridY": 2
+			} )
+			add( new FormComponent( "javax.swing.JTextArea" ) {
+				name: "textArea"
+				"editable": false
+				"font": new java.awt.Font( "Monospaced", 0, 12 )
+				"opaque": false
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 2
+				"gridY": 4
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 10, 5 )
+			"size": new java.awt.Dimension( 265, 300 )
+		} )
+	}
+}
