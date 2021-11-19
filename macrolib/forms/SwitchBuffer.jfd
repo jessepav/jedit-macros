@@ -4,11 +4,12 @@ new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
-			"$columnSpecs": "relgap, 131dlu, relgap"
+			"$columnSpecs": "relgap, max(pref;131dlu):grow, relgap"
 			"$rowSpecs": "relgap, default, linegap, fill:default:grow, relgap"
 		} ) {
 			name: "this"
 			"title": "Switch Buffer"
+			"resizable": false
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label"
 				"text": "Choose Buffer:"

@@ -34,9 +34,10 @@ void switchBuffer() {
 
         //======== dialog ========
         dialog.setTitle("Switch Buffer");
+        dialog.setResizable(false);
         Container contentPane = dialog.getContentPane();
         contentPane.setLayout(new FormLayout(
-            "$rgap, 131dlu, $rgap",
+            "$rgap, [131dlu,pref]:grow, $rgap",
             "$rgap, default, $lgap, fill:default:grow, $rgap"));
 
         //---- label ----
@@ -85,6 +86,8 @@ void switchBuffer() {
             bufnum = c - 'A' + 9;
         if (bufnum != -1 && bufnum < buffers.length)
             editPane.setBuffer(buffers[bufnum]);
+        else
+            view.getStatus().setMessage("Switch buffer cancelled");
         dialog.setVisible(false);
     }
 
@@ -94,14 +97,21 @@ void switchBuffer() {
     // ---- Entry point ----
     
     Object[] components = jpMap.get("switchBufferComponents");
+    // Object[] components = null;
     if (components == null) {
         initComponents(view);
-        jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea });
+        jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, view });
     } else {
         dialog = components[0];
         owner = components[1];
         label = components[2];
         bufferTextArea = components[3];
+        View cachedView = components[4];
+        if (cachedView != view) {
+            // view.getStatus().setMessage("Rebuilding dialog");
+            initComponents(view);
+            jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, view });
+        }
     }
     show();
 }
