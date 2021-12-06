@@ -1,0 +1,11 @@
+import org.joda.time.LocalDateTime;
+import org.joda.time.ReadablePartial;
+import org.joda.time.format.*;
+
+void insertCurrentDate() {
+    DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("MMMM d, yyyy");
+    String date = dateTimeFormatter.print(LocalDateTime.now());
+    textArea.setSelectedText(date);
+}
+
+insertCurrentDate();
