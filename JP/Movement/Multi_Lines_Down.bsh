@@ -1,2 +1,7 @@
-for (int i = 0; i < 5; i++)
-    textArea.goToNextLine(false);
+void moveDownMulti() {
+    int delta = jEdit.getIntegerProperty("JP.multiVerticalDelta", 5);
+    for (int i = 0; i < delta; i++)
+        textArea.goToNextLine(false);
+}
+
+moveDownMulti();
