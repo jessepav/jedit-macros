@@ -1,2 +1,0 @@
-jEdit.unsetProperty("jp-backup-dir");
-Macros.getMacro("JP/Save_to_Backup_Dir").invoke(view);
