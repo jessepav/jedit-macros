@@ -213,7 +213,7 @@ public final class MarkdownUtils
     }
     
     // (?<=(?:^|\n) *)> ?
-    public static final Pattern BLOCKQUOTE_PATTERN = Pattern.compile("(?<=(?:^|\\n) *)> ?");
+    public static final Pattern BLOCKQUOTE_PATTERN = Pattern.compile("(?<=(?:^|\\n) {0,8})> ?");
     
     /**
      * Reflow selected text (if a selection is active) or the current paragraph
