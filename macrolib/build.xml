@@ -30,7 +30,13 @@
   
   <target name="jar" depends="compile" description="JAR up build output">
     <mkdir dir="${jar.dir}"/>
-    <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}" duplicate="fail"/>
+    <jar destfile="${jar.dir}/${ant.project.name}.jar" duplicate="fail">
+      <fileset dir="${classes.dir}">
+        <exclude name="com/illcode/jedit/LegendaryWrap.class"/>
+        <exclude name="com/illcode/jedit/MacroPlayground.class"/>
+        <exclude name="com/illcode/jedit/SwitchBuffer.class"/>
+      </fileset>
+    </jar>
   </target>
   
   <target name="install" depends="jar" description="Copy .jar file to jEdit jars dir">
