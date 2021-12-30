@@ -3,15 +3,15 @@
 // Also, if the "JP.wrapLen" buffer property is defined, it will take precedence over the usual
 // maxLineLen buffer property.
 
+import com.illcode.jedit.MarkdownUtils;
+
 void markdownFormatParagraph() {
-    if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
-        // Load objects into the global namespace
-        BeanShell.runScript(view,
-            MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
-            null,false);
+    MarkdownUtils markdownUtils = jpMap.get("markdownUtils");
+    if (markdownUtils == null || jEdit.getBooleanProperty("JP.debug")) {
+        markdownUtils = new MarkdownUtils();
+        jpMap.put("markdownUtils", markdownUtils);
     }
-    
-    markdownFormatter.formatParagraph(view, textArea, buffer, 0);
+    markdownUtils.formatParagraph(view, textArea, buffer, 0);
 }
 
 if (jEdit.getBooleanProperty("JP.benchmark")) {

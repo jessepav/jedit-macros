@@ -1,8 +1,12 @@
-if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
-    // Load objects into the global namespace
-    BeanShell.runScript(view,
-        MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
-        null,false);
+import com.illcode.jedit.MarkdownUtils;
+
+void markdownToggleBlockquote() {
+    MarkdownUtils markdownUtils = jpMap.get("markdownUtils");
+    if (markdownUtils == null || jEdit.getBooleanProperty("JP.debug")) {
+        markdownUtils = new MarkdownUtils();
+        jpMap.put("markdownUtils", markdownUtils);
+    }
+    markdownUtils.toggleBlockquote(view, textArea, buffer);
 }
 
-markdownFormatter.toggleBlockquote(view, textArea, buffer);
+markdownToggleBlockquote();

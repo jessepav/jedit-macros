@@ -1,12 +1,12 @@
+import com.illcode.jedit.MarkdownUtils;
+
 void markdownFormatParagraphFirstLineLength() {
-    if (markdownFormatter == void || jEdit.getBooleanProperty("JP.debug")) {
-        // Load objects into the global namespace
-        BeanShell.runScript(view,
-            MiscUtilities.getParentOfPath(scriptPath) + "Markdown_Define_Objects.bsh",
-            null,false);
+    MarkdownUtils markdownUtils = jpMap.get("markdownUtils");
+    if (markdownUtils == null || jEdit.getBooleanProperty("JP.debug")) {
+        markdownUtils = new MarkdownUtils();
+        jpMap.put("markdownUtils", markdownUtils);
     }
-    
-    markdownFormatter.formatParagraph(view, textArea, buffer, -1);
+    markdownUtils.formatParagraph(view, textArea, buffer, -1);
 }
 
 markdownFormatParagraphFirstLineLength();
