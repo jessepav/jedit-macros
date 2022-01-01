@@ -1,0 +1,25 @@
+/*
+ * Toggles the value of the built-in maxLineLen buffer property between its original
+ * value, and the value of JP.wrapLen. If JP.wrapLen is undefined, then the macro
+ * does nothing.
+ */
+
+void markdownToggleWrapLen() {
+    int jpLen = buffer.getIntegerProperty("JP.wrapLen", -1);
+    int len = buffer.getIntegerProperty("maxLineLen", -1);
+    if (jpLen == -1 || len == -1)
+        return;
+    if (jpLen != len) {
+        buffer.setProperty("JP.oldWrapLen", len);
+        buffer.setProperty("maxLineLen", jpLen);
+        buffer.propertiesChanged();
+    } else {
+        int oldLen = buffer.getIntegerProperty("JP.oldWrapLen", -1);
+        if (oldLen == -1)
+            return;
+        buffer.setProperty("maxLineLen", oldLen);
+        buffer.propertiesChanged();
+    }
+}
+
+markdownToggleWrapLen();
