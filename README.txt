@@ -21,7 +21,7 @@
 
    The macros themselves are in "JP".
    
-   Put "JP_Macro_Utils.bsh" in your "startup"
+   Put "00_JP_Macro_Utils.bsh" in your "startup"
    folder (in the jEdit settings directory).
    
    Documentation is found in the "doc"

@@ -1,0 +1,45 @@
+/*
+ * This macro registers an EditBus component that will 
+ * 
+ * 1. Prevent a buffer's maxLineLen property from being changed upon a buffer-save,
+ *    even if the buffer specifies a maxLineLen in its local properties.
+ * 
+ * You may consider adding this macro to your jEdit startup folder (it depends on
+ * 00_JP_Macro_Utils.bsh, but since startup scripts are run in alphabetical order,
+ * it will be run later in the startup sequence).
+ */
+
+EBComponent defineJPEditBusComponent() {
+    int lineLen;
+    
+    public void handleMessage(EBMessage msg) {
+        if (msg instanceof BufferUpdate) {
+            Object what = msg.getWhat();
+            Buffer buffer = msg.getBuffer();
+            if (what == BufferUpdate.SAVING) {
+                lineLen = buffer.getIntegerProperty("maxLineLen", 0);
+            } else if (what == BufferUpdate.SAVED) {
+                buffer.setProperty("maxLineLen", lineLen);
+                buffer.propertiesChanged();
+            }
+        }
+    }
+    
+    return this;
+}
+
+void installJPEditBusComponent() {
+    EBComponent prev = jpMap.get("JPEditBusComponent");
+    if (prev != null)
+        EditBus.removeFromBus(prev);
+    EBComponent c = defineJPEditBusComponent();
+    EditBus.addToBus(c);
+    jpMap.put("JPEditBusComponent", c);
+}
+
+installJPEditBusComponent();
+
+// We have these here in case this macro is run at startup, to avoid polluting the
+// global namespace.
+unset("defineJPEditBusComponent");
+unset("installJPEditBusComponent");
