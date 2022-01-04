@@ -19,8 +19,11 @@ EBComponent defineJPEditBusComponent() {
             if (what == BufferUpdate.SAVING) {
                 lineLen = buffer.getIntegerProperty("maxLineLen", 0);
             } else if (what == BufferUpdate.SAVED) {
-                buffer.setProperty("maxLineLen", lineLen);
-                buffer.propertiesChanged();
+                int len = buffer.getIntegerProperty("maxLineLen", 0);
+                if (len != lineLen) {
+                    buffer.setProperty("maxLineLen", lineLen);
+                    buffer.propertiesChanged();
+                }
             }
         }
     }
