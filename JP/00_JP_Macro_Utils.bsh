@@ -8,6 +8,7 @@ To reload while editing:
 
 import java.awt.datatransfer.DataFlavor;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 String getRegisterText(char reg) {
@@ -97,6 +98,49 @@ String getPropertyPath(View view, String propName, boolean isDir) {
         }
     }
     return path;
+}
+
+/**
+ * Return the number of the text line that has a whitespace indentation level with the specified
+ * relationship to the indentation level of the caret line, or -1 if no such line exists.
+ * @param textArea text area, as predefined in macros
+ * @param forward true to search forward, false to search backward
+ * @param rel indentation relationship to the caret line:<br>
+ *            -1 = less indentation, 0 = same indentation, 1 = more indentation
+ * @param invert true to invert the relationship specified by {@code rel}. Can be used to get
+ *            {@code >=}, {@code !=}, or {@code <=} relationships.
+ */
+int getLineWithIndentation(TextArea textArea, boolean forward, int rel, boolean invert) {
+    int caretLine = textArea.getCaretLine();
+    String s = textArea.getLineText(caretLine);
+    if (StringUtils.isWhitespace(s))
+        return -1;
+    int numLines = textArea.getLineCount();
+    int currentLine = caretLine + (forward ? 1 : -1);
+    int tabSize = textArea.getBuffer().getTabSize();
+    int indent = StandardUtilities.getLeadingWhiteSpaceWidth(s, tabSize);
+    while (currentLine >= 0 && currentLine < numLines) {
+        String line = textArea.getLineText(currentLine);
+        int lineIndent = StandardUtilities.getLeadingWhiteSpaceWidth(line, tabSize);
+        if (!StringUtils.isWhitespace(line)) {
+            switch (rel) {
+            case -1:
+                if ((lineIndent < indent) == !invert)
+                    return currentLine;
+                break;
+            case 0:
+                if ((lineIndent == indent) == !invert)
+                    return currentLine;
+                break;
+            case 1:
+                if ((lineIndent > indent) == !invert)
+                    return currentLine;
+                break;
+            }
+        }
+        currentLine += forward ? 1 : -1;
+    }
+    return -1;
 }
 
 /*
