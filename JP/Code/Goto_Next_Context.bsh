@@ -1,0 +1,11 @@
+void gotoNextContext() {
+    int n = getLineWithIndentation(textArea, true, 1, true);
+    if (n == -1)
+        view.getStatus().setMessage("No context available");
+    else {
+        textArea.setCaretPosition(textArea.getLineStartOffset(n));
+        textArea.goToStartOfWhiteSpace(false);
+    }
+}
+
+gotoNextContext();

@@ -1,0 +1,12 @@
+
+void showContextLine() {
+    int n = getLineWithIndentation(textArea, false, -1, false);
+    String msg;
+    if (n == -1)
+        msg = "No context available";
+    else
+        msg = textArea.getLineText(n);
+    view.getStatus().setMessage(msg);
+}
+
+showContextLine();
