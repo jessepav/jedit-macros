@@ -1,1 +1,15 @@
-buffer.toggleWordWrap(view);
+// buffer.toggleWordWrap(view);
+
+void toggleWordWrap() {
+    String wrap = buffer.getStringProperty("wrap");
+    String newWrap;
+    if (wrap != null && wrap.equals("soft"))
+        newWrap = "none";
+    else
+        newWrap = "soft";
+    buffer.setStringProperty("wrap", newWrap);
+    buffer.propertiesChanged();
+    view.getStatus().setMessage("Wrap set to: " + newWrap);
+}
+
+toggleWordWrap();
