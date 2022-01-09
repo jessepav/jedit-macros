@@ -29,8 +29,8 @@ void switchBuffer() {
     JLabel label;
     JTextArea bufferTextArea;
     Timer timer;
+
     int timerCount;
-    
     Buffer[] buffers;
     int[] namePositions;
 
@@ -61,8 +61,6 @@ void switchBuffer() {
         bufferTextArea.setEditable(false);
         bufferTextArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
         bufferTextArea.setOpaque(false);
-        bufferTextArea.addKeyListener(super);
-        bufferTextArea.addMouseListener(super);
         contentPane.add(bufferTextArea, CC.xy(2, 4));
     }
 
@@ -86,9 +84,13 @@ void switchBuffer() {
         dialog.pack();
         dialog.setLocationRelativeTo(owner);
         bufferTextArea.requestFocusInWindow();
+        bufferTextArea.addKeyListener(super);
+        bufferTextArea.addMouseListener(super);
         timerCount = 0;
         timer.start();  // try to work around ChromeOS focus issues - see actionPerformed()
         dialog.setVisible(true);  // blocks until hidden
+        bufferTextArea.removeKeyListener(super);
+        bufferTextArea.removeMouseListener(super);
         buffers = null;
         namePositions = null;
     }
@@ -156,17 +158,18 @@ void switchBuffer() {
     Object[] components = jpMap.get("switchBufferComponents");
     if (components == null || jEdit.getBooleanProperty("JP.debug")) {
         initComponents(view);
-        jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, view });
+        jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, timer, view });
     } else {
         dialog = components[0];
         owner = components[1];
         label = components[2];
         bufferTextArea = components[3];
-        View cachedView = components[4];
+        timer = components[4];
+        View cachedView = components[5];
         if (cachedView != view) {
             // view.getStatus().setMessage("Rebuilding dialog");
             initComponents(view);
-            jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, view });
+            jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, timer, view });
         }
     }
     show();
