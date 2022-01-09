@@ -16,14 +16,23 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.Timer;
 
 void switchBuffer() {
+    private static final int TIMER_DELAY = 100;
+    private static final int MAX_TIMER_COUNT = 10;
+    
     JDialog dialog;
     JFrame owner;
     JLabel label;
     JTextArea bufferTextArea;
+    Timer timer;
+    int timerCount;
     
     Buffer[] buffers;
+    int[] namePositions;
 
     void initComponents(JFrame owner) {
         super.owner = owner;
@@ -31,6 +40,8 @@ void switchBuffer() {
         dialog = new JDialog(owner, true);
         label = new JLabel();
         bufferTextArea = new JTextArea();
+        timer = new Timer(TIMER_DELAY, (ActionListener) super);
+        timer.setRepeats(false);
 
         //======== dialog ========
         dialog.setTitle("Switch Buffer");
@@ -50,6 +61,8 @@ void switchBuffer() {
         bufferTextArea.setEditable(false);
         bufferTextArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
         bufferTextArea.setOpaque(false);
+        bufferTextArea.addKeyListener(super);
+        bufferTextArea.addMouseListener(super);
         contentPane.add(bufferTextArea, CC.xy(2, 4));
     }
 
@@ -58,23 +71,29 @@ void switchBuffer() {
         BufferSet bufferSet = editPane.getBufferSet();
         buffers = bufferSet.getAllBuffers();
         int n = buffers.length;
+        namePositions = new int[n];
         for (int i = 0; i < n; i++) {
             if (i != 0)
                 sb.append('\n');
             sb.append((char)(i < 9 ? '1' + i : 'A' + i-9)).append(". ");
-            sb.append(buffers[i].getName());
+            String name = buffers[i].getName();
+            sb.append(name);
+            namePositions[i] = sb.length();
         }
         bufferTextArea.setText(sb.toString());
         sb = null;
 
         dialog.pack();
         dialog.setLocationRelativeTo(owner);
-        bufferTextArea.addKeyListener(super);
         bufferTextArea.requestFocusInWindow();
+        timerCount = 0;
+        timer.start();  // try to work around ChromeOS focus issues - see actionPerformed()
         dialog.setVisible(true);  // blocks until hidden
-        bufferTextArea.removeKeyListener(super);
         buffers = null;
+        namePositions = null;
     }
+    
+    // KeyListener -------------
 
     public void keyTyped(KeyEvent e) {
         char c = e.getKeyChar();
@@ -93,6 +112,44 @@ void switchBuffer() {
 
     public void keyPressed(KeyEvent e) {}
     public void keyReleased(KeyEvent e) {}
+    
+    // End KeyListener ------------
+    
+    // MouseListener ------------
+    
+    public void mouseClicked(MouseEvent e) {
+        int pos = bufferTextArea.viewToModel(e.getPoint());
+        if (pos == -1)
+            return;
+        for (int i = 0; i < namePositions.length; i++) {
+            if (pos <= namePositions[i]) {
+                editPane.setBuffer(buffers[i]);
+                break;
+            }
+        }
+        dialog.setVisible(false);
+    }
+    
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+
+    // End MouseListener ------------
+    
+    // ActionListener
+    public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
+        if (source == timer) {
+            if (++timerCount == MAX_TIMER_COUNT)
+                return;
+            if (!dialog.isFocused()) {
+                view.getStatus().setMessage("timerCount = " + timerCount);
+                bufferTextArea.requestFocus();
+                timer.start();
+            }
+        }
+    }
     
     // ---- Entry point ----
     
