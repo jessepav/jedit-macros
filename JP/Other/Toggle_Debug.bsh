@@ -1,0 +1,3 @@
+boolean debug = !jEdit.getBooleanProperty("JP.debug");
+jEdit.setBooleanProperty("JP.debug", debug);
+view.getStatus().setMessage("JP.debug set to " + Boolean.toString(debug));
