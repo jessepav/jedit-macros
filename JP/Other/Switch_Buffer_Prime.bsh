@@ -21,15 +21,15 @@ import java.awt.event.MouseListener;
 import javax.swing.Timer;
 
 void switchBuffer() {
-    private static final int TIMER_DELAY = 100;
+    private static final int TIMER_DELAY = 200;
     private static final int MAX_TIMER_COUNT = 10;
     
     JDialog dialog;
     JFrame owner;
     JLabel label;
     JTextArea bufferTextArea;
-    Timer timer;
 
+    Timer timer;
     int timerCount;
     Buffer[] buffers;
     int[] namePositions;
@@ -40,12 +40,10 @@ void switchBuffer() {
         dialog = new JDialog(owner, true);
         label = new JLabel();
         bufferTextArea = new JTextArea();
-        timer = new Timer(TIMER_DELAY, (ActionListener) super);
-        timer.setRepeats(false);
 
         //======== dialog ========
-        dialog.setTitle("Switch Buffer");
         dialog.setResizable(false);
+        dialog.setUndecorated(true);
         Container contentPane = dialog.getContentPane();
         contentPane.setLayout(new FormLayout(
             "$rgap, [131dlu,pref]:grow, $rgap",
@@ -65,6 +63,7 @@ void switchBuffer() {
     }
 
     void show() {
+        // Build up the buffer list
         StringBuilder sb = new StringBuilder(256);
         BufferSet bufferSet = editPane.getBufferSet();
         buffers = bufferSet.getAllBuffers();
@@ -81,11 +80,14 @@ void switchBuffer() {
         bufferTextArea.setText(sb.toString());
         sb = null;
 
+        // Setup event handling & show the dialog
         dialog.pack();
         dialog.setLocationRelativeTo(owner);
         bufferTextArea.requestFocusInWindow();
         bufferTextArea.addKeyListener(super);
         bufferTextArea.addMouseListener(super);
+        timer = new Timer(TIMER_DELAY, (ActionListener) super);
+        timer.setRepeats(false);
         timerCount = 0;
         timer.start();  // try to work around ChromeOS focus issues - see actionPerformed()
         dialog.setVisible(true);  // blocks until hidden
@@ -93,6 +95,7 @@ void switchBuffer() {
         bufferTextArea.removeMouseListener(super);
         buffers = null;
         namePositions = null;
+        timer = null;
     }
     
     // KeyListener -------------
@@ -158,18 +161,17 @@ void switchBuffer() {
     Object[] components = jpMap.get("switchBufferComponents");
     if (components == null || jEdit.getBooleanProperty("JP.debug")) {
         initComponents(view);
-        jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, timer, view });
+        jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, view });
     } else {
         dialog = components[0];
         owner = components[1];
         label = components[2];
         bufferTextArea = components[3];
-        timer = components[4];
-        View cachedView = components[5];
+        View cachedView = components[4];
         if (cachedView != view) {
             // view.getStatus().setMessage("Rebuilding dialog");
             initComponents(view);
-            jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, timer, view });
+            jpMap.put("switchBufferComponents", new Object[] { dialog, owner, label, bufferTextArea, view });
         }
     }
     show();
