@@ -13,6 +13,7 @@
     <orderEntry type="library" name="jedit" level="project" />
     <orderEntry type="library" name="commons-lang3-3.4" level="project" />
     <orderEntry type="library" name="jgoodies-forms" level="project" />
+    <orderEntry type="library" name="commons-exec-1.3" level="project" />
   </component>
 </module>
 
