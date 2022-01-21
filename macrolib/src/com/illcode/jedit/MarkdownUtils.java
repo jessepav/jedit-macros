@@ -189,6 +189,10 @@ public final class MarkdownUtils
         col = indent + words[0].length(); 
         for (int i = 1; i < n; i++) {
             String word = words[i];
+            if (wrapMargin == -2) {  // we're unfilling text
+                sb.append(' ').append(word);
+                continue;
+            }
             int wordlen = word.length();
             int remaining = wrapMargin - col + 1;
             int overflow = wordlen + 1 - remaining;
@@ -220,9 +224,10 @@ public final class MarkdownUtils
      * to fit within the wrapMargin.
      *
      * If wrapMargin == 0, the margin will be taken from the JP.wrapLen buffer property, or, if 
-                           that property is not defined, the buffer's maxLineLen property.
+     *                     that property is not defined, the buffer's maxLineLen property.
      * If wrapMargin == -1, the margin will be taken from the length of the first line of
      *                      the text to wrap.
+     * If wrapMargin == -2, the text will be "unfilled" (newlines removed)
      */
     public void formatParagraph(View view, JEditTextArea textArea, Buffer buffer, int wrapMargin) {
         int parStartLine = -1, parEndLine = -1;

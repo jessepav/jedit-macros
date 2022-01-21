@@ -1,0 +1,12 @@
+import com.illcode.jedit.MarkdownUtils;
+
+void markdownUnfillParagraph() {
+    MarkdownUtils markdownUtils = jpMap.get("markdownUtils");
+    if (markdownUtils == null || jEdit.getBooleanProperty("JP.debug")) {
+        markdownUtils = new MarkdownUtils();
+        jpMap.put("markdownUtils", markdownUtils);
+    }
+    markdownUtils.formatParagraph(view, textArea, buffer, -2);
+}
+
+markdownUnfillParagraph();
