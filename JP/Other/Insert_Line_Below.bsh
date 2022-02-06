@@ -1,7 +1,5 @@
-if (textArea.getSelectionCount() != 0)
-    return;   // we don't want to overwrite any selected text
-    
 int caretPos = textArea.getCaretPosition();
-textArea.goToEndOfLine(false);
-textArea.setSelectedText("\n");
+buffer.insert(Math.min(textArea.getLineEndOffset(textArea.getCaretLine()),
+                       buffer.getLength()),
+              "\n");
 textArea.setCaretPosition(caretPos);
